@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import { useUserStore } from '@/stores/user'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +26,16 @@ const router = createRouter({
       component: LoginView
     }
   ]
-})
+});
+
+router.beforeEach((to, from) => {
+  const userStore = useUserStore();
+
+  if (to.name !== 'login' && !userStore.user) {
+    return {name: 'login'};
+  } else {
+    return true;
+  }
+});
 
 export default router
