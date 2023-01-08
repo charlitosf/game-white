@@ -1,15 +1,31 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { getDatabase, ref as fRef, runTransaction } from 'firebase/database';
+import { getDatabase, ref as fRef, runTransaction, onChildAdded, onChildRemoved, update } from 'firebase/database';
 import { useUserStore } from '@/stores/user';
 import { generate4DigitRandomNumber } from '@/utils/utils';
+import { ref, type Ref } from 'vue';
 
 const router = useRouter();
+const userStore = useUserStore();
+const db = getDatabase();
+const rootRef = fRef(db);
+const userRef = fRef(db, userStore.user?.uid);
+
+const currentGames: Ref<string[]> = ref([]);
+
+onChildAdded(userRef, (snapshot) => {
+  currentGames.value.push(snapshot.key!);
+});
+
+onChildRemoved(userRef, (snapshot) => {
+  const index = currentGames.value.indexOf(snapshot.key!);
+  if (index > -1) {
+    currentGames.value.splice(index, 1);
+  }
+});
 
 const onStartGame = async () => {
-  const db = getDatabase();
   const rootRef = fRef(db);
-  const userStore = useUserStore();
   await runTransaction(rootRef, (currentData) => {
     if (currentData === null) {
       const gameCode = generate4DigitRandomNumber();
@@ -53,6 +69,17 @@ const onStartGame = async () => {
 const onJoinGame = () => {
   router.push('/lobby');
 };
+
+const onDeleteGame = (gameIndex: number) => {
+  const gameCode = currentGames.value[gameIndex];
+
+  const updates: {[id: string]: null} = {};
+  updates[`/games/${gameCode}`] = null;
+  updates[`/${userStore.user?.uid!}/${gameCode}`] = null;
+
+  update(rootRef, updates);
+
+};
 </script>
 
 <template>
@@ -62,7 +89,10 @@ const onJoinGame = () => {
   <h2>
     My currently started games:
   </h2>
-  <div>
-    Game1
-  </div>
+  <ul>
+    <li v-for="game, index in currentGames">
+      {{ game }}
+      <button @click="onDeleteGame(index)">Delete</button>
+    </li>
+  </ul>
 </template>
