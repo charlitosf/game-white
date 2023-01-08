@@ -36,6 +36,11 @@ const auth = getAuth(fApp);
 onAuthStateChanged(auth, (user) => {
   const userStore = useUserStore();
   userStore.user = user;
+  if (user) {
+    router.push('/')
+  } else {
+    router.push('/login')
+  }
 });
 
 app.mount('#app')

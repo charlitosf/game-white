@@ -86,7 +86,6 @@ const doLogin = () => {
 <style scoped>
 .container {
    margin: 0 auto;
-   max-width: 100%;
    padding: 0 1rem;
 }
 
@@ -135,7 +134,7 @@ p {
 .login-page {
   align-items: center;
   display: flex;
-  height: 100vh;
+  height: 85vh;
 }
 
 .fade-enter-active, .fade-leave-active {
