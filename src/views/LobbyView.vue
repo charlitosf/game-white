@@ -46,9 +46,7 @@ const onStartGame = () => {
 </script>
 
 <template>
-  <h1>
-    Lobby
-  </h1>
+  <h1>Lobby of game {{ gameId }}</h1>
   <button @click="onStartGame">Start Game</button>
   <h2>Participants</h2>
   <ul>

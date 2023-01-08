@@ -12,6 +12,7 @@ const rootRef = fRef(db);
 const userRef = fRef(db, userStore.user?.uid);
 
 const currentGames: Ref<string[]> = ref([]);
+const gameId = ref('');
 
 onChildAdded(userRef, (snapshot) => {
   currentGames.value.push(snapshot.key!);
@@ -68,7 +69,7 @@ const onStartGame = async () => {
 };
 
 const onJoinGame = () => {
-  router.push('/lobbies');
+  router.push(`/lobbies/${gameId.value}`);
 };
 
 const onDeleteGame = (gameIndex: number) => {
@@ -87,6 +88,7 @@ const onDeleteGame = (gameIndex: number) => {
   <h1>Welcome to the game "White"!</h1>
   <button @click="onStartGame">Start new game</button>
   <button @click="onJoinGame">Join game</button>
+  <input type="text" v-model="gameId" />
   <h2>
     My currently started games:
   </h2>
