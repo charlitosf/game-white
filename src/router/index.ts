@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
 import { useUserStore } from '@/stores/user'
+import LobbyView from '@/views/LobbyView.vue';
+import GameView from '@/views/GameView.vue';
 
 
 const router = createRouter({
@@ -24,6 +26,16 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: LoginView
+    },
+    {
+      path: '/lobby',
+      name: 'lobby',
+      component: LobbyView
+    },
+    {
+      path: '/game',
+      name: 'game',
+      component: GameView
     }
   ]
 });
