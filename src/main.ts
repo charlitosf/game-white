@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 import App from './App.vue'
 import router from './router'
@@ -8,6 +9,7 @@ import { initializeApp } from "firebase/app";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 import './assets/main.css'
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 
 // Your web app's Firebase configuration
@@ -23,12 +25,18 @@ const firebaseConfig = {
   measurementId: "G-23Y46F2N9X"
 };
 
-// Initialize Firebase
-initializeApp(firebaseConfig);
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+// Initialize Firebase
+const fApp = initializeApp(firebaseConfig);
+const auth = getAuth(fApp);
+onAuthStateChanged(auth, (user) => {
+  const userStore = useUserStore();
+  userStore.user = user;
+});
 
 app.mount('#app')
+

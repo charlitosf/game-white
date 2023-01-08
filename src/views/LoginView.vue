@@ -5,10 +5,10 @@
    <div class="container">
       <div v-if="!registerActive" class="card login" v-bind:class="{ error: emptyFields }">
          <h1>Sign In</h1>
-         <form class="form-group">
+         <form class="form-group" @submit.prevent="doLogin">
             <input v-model="emailLogin" type="email" class="form-control" placeholder="Email" required>
             <input v-model="passwordLogin" type="password" class="form-control" placeholder="Password" required>
-            <input type="submit" class="btn" @click="doLogin">
+            <input type="submit" class="btn">
             <p>Don't have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign up here</a>
             </p>
          </form>
@@ -16,11 +16,11 @@
 
       <div v-else class="card register" v-bind:class="{ error: emptyFields }">
          <h1>Sign Up</h1>
-         <form class="form-group">
+         <form class="form-group" @submit.prevent="doRegister">
             <input v-model="emailReg" type="email" class="form-control" placeholder="Email" required>
             <input v-model="passwordReg" type="password" class="form-control" placeholder="Password" required>
             <input v-model="confirmReg" type="password" class="form-control" placeholder="Confirm Password" required>
-            <input type="submit" class="btn" @click="doRegister">
+            <input type="submit" class="btn">
             <p>Already have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign in here</a>
             </p>
          </form>
@@ -31,6 +31,10 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { useUserStore } from '@/stores/user';
+
+const userStore = useUserStore();
 
 const emailReg = ref('');
 const passwordReg = ref('');
@@ -47,8 +51,18 @@ const doRegister = () => {
       emptyFields.value = true;
    } else {
       emptyFields.value = false;
+      if (passwordReg.value != confirmReg.value) {
+         alert('Passwords do not match');
+         return;
+      }
       // Register using firebase auth
-      
+      const auth = getAuth();
+      createUserWithEmailAndPassword(auth, emailReg.value, passwordReg.value)
+         .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            alert(`${errorCode}: ${errorMessage}}`)
+         });
    }
 }
 
@@ -57,6 +71,14 @@ const doLogin = () => {
       emptyFields.value = true;
    } else {
       emptyFields.value = false;
+      // Login using firebase auth
+      const auth = getAuth();
+      signInWithEmailAndPassword(auth, emailLogin.value, passwordLogin.value)
+         .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            alert(`${errorCode}: ${errorMessage}}`)
+         });
    }
 }
 </script>
