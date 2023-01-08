@@ -26,13 +26,14 @@ onChildRemoved(userRef, (snapshot) => {
 
 const onStartGame = async () => {
   const rootRef = fRef(db);
+  let gameCode: string = '';
   await runTransaction(rootRef, (currentData) => {
     if (currentData === null) {
-      const gameCode = generate4DigitRandomNumber();
+      gameCode = generate4DigitRandomNumber();
       return {
         games: {
           [gameCode]: {
-            [userStore.user?.uid!]: true
+            [userStore.user?.uid!]: userStore.user?.email
           }
         },
         [userStore.user?.uid!]: {
@@ -53,7 +54,7 @@ const onStartGame = async () => {
         gameCode = generate4DigitRandomNumber();
       }
       currentData.games[gameCode] = {
-        [userStore.user?.uid!]: true
+        [userStore.user?.uid!]: userStore.user?.email
       };
       currentData[userStore.user?.uid!][gameCode] = {
         gameStarted: false,
@@ -63,11 +64,11 @@ const onStartGame = async () => {
       return currentData;
     }
   })
-  router.push('/lobby');
+  router.push(`/lobbies/${gameCode}`);
 };
 
 const onJoinGame = () => {
-  router.push('/lobby');
+  router.push('/lobbies');
 };
 
 const onDeleteGame = (gameIndex: number) => {
