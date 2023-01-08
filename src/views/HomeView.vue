@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <h1>Welcome to the game "White"!</h1>
+  <button>Start new game</button>
+  <button>Join game</button>
+  My currently started games:
 </template>
