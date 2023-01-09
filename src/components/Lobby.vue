@@ -60,7 +60,10 @@ const onParticipantClicked = (participantUid: string) => {
 };
 
 const onKick = (participantUid: string) => {
-  set(child(participantsRef, participantUid), null);
+  const updates: {[path: string]: any} = {};
+  updates[`/participants/${participantUid}`] = null;
+  updates[`/whitePlayers/${participantUid}`] = null;
+  update(gameRef, updates);
 };
 
 const onMakeAdmin = (participantUid: string) => {

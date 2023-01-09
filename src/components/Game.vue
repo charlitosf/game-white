@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/user';
+import { computed } from '@vue/reactivity';
 import { child, getDatabase, onValue, ref as fRef, set } from 'firebase/database';
 import { onBeforeUnmount, ref, type Ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
+const router = useRouter();
 const props = defineProps<{
   id: string | string[];
 }>();
@@ -27,10 +30,13 @@ const offValue = onValue(gameRef, (snapshot) => {
   game.value = snapshot.val();
 });
 
+const amIAdmin = computed(() => game.value.admin == userStore.user?.uid);
+
 const onEndGame = () => {
   set(child(gameRef, 'gameStarted'), false);
   set(child(gameRef, 'word'), '');
 };
+
 
 onBeforeUnmount(() => {
   offValue();
@@ -38,7 +44,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <button v-if="game.admin == userStore.user?.uid" @click="onEndGame">End Game</button>
+  <button v-if="amIAdmin" @click="onEndGame" class="btn btn-danger">End Game</button>
   <h1>
     The word is 
     <span v-if="game.whitePlayers != null && game.whitePlayers[userStore.user?.uid!]">Blanco :·)</span>
