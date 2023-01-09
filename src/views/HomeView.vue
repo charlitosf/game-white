@@ -52,11 +52,32 @@ const onStartGame = async () => {
   router.push(`/games/${gameCode}`);
 };
 
-const onJoinGame = () => {
+const onJoinGame = async () => {
   const gameRef = fRef(db, `${gameId.value}`);
-  const gameUserRef = child(gameRef, `participants/${userStore.user?.uid!}`);
-  set(gameUserRef, userStore.user?.email);
-  router.push(`/games/${gameId.value}`);
+  try {
+    const result = await runTransaction(gameRef, (currentData) => {
+      if (currentData === null) {
+        return;
+      } else if (currentData.admin === userStore.user?.uid) {
+        return currentData;
+      } else if (currentData.gameStarted) {
+        return;
+      } else if (currentData.admin !== userStore.user?.uid) {
+        currentData.participants = {
+          ...currentData.participants,
+          [userStore.user?.uid!]: userStore.user?.email,
+        };
+        return currentData;
+      }
+    });
+    if (result.committed) {
+      router.push(`/games/${gameId.value}`);
+    } else {
+      alert('Game does not exist or has already started!');
+    }
+  } catch (error) {
+    alert('Game does not exist or has already started!')
+  }
 };
 
 const onDeleteGame = (gameIndex: number) => {
@@ -68,17 +89,56 @@ const onDeleteGame = (gameIndex: number) => {
 </script>
 
 <template>
-  <h1>Welcome to the game "White"!</h1>
-  <button @click="onStartGame">Start new game</button>
-  <button @click="onJoinGame">Join game</button>
-  <input type="text" v-model="gameId" />
-  <h2>
-    My currently started games:
-  </h2>
-  <ul>
-    <li v-for="game, index in currentGames">
-      {{ game }}
-      <button @click="onDeleteGame(index)">Delete</button>
-    </li>
-  </ul>
+  <div class="container flex spread vertical-centered mb-1 title">
+    Welcome to the game "White"!
+    <button @click="onStartGame" class="btn btn-primary">Start new game</button>
+  </div>
+  <div class="container">
+    <form @submit.prevent="onJoinGame" class="inline-form-group">
+      <input type="text" v-model="gameId" class="inline-form-control" placeholder="Game code" />
+      <button type="submit" class="btn btn-primary">Join game</button>
+    </form>
+  </div>
+  <div class="container">
+    <h2>
+      My currently started games:
+    </h2>
+    <div class="flex vertical-baselined background-container" v-for="game, index in currentGames" :key="index">
+      <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
+      <button @click="onDeleteGame(index)" class="btn btn-danger">Delete</button>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.spread {
+  justify-content: space-between;
+}
+
+.vertical-centered {
+  align-items: center;
+}
+
+.vertical-baselined {
+  align-items: baseline;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background-color: var(--color-background-soft);
+}
+
+.background-container {
+  background-color: var(--color-background-mute);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.main-element {
+  background-color: var(--color-background-soft);
+  padding: 1rem;
+  flex-grow: 1;
+}
+</style>

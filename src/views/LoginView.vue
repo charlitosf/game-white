@@ -8,7 +8,7 @@
          <form class="form-group" @submit.prevent="doLogin">
             <input v-model="emailLogin" type="email" class="form-control" placeholder="Email" required>
             <input v-model="passwordLogin" type="password" class="form-control" placeholder="Password" required>
-            <input type="submit" class="btn">
+            <input type="submit" class="btn btn-primary">
             <p>Don't have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign up here</a>
             </p>
          </form>
@@ -20,7 +20,7 @@
             <input v-model="emailReg" type="email" class="form-control" placeholder="Email" required>
             <input v-model="passwordReg" type="password" class="form-control" placeholder="Password" required>
             <input v-model="confirmReg" type="password" class="form-control" placeholder="Confirm Password" required>
-            <input type="submit" class="btn">
+            <input type="submit" class="btn btn-primary">
             <p>Already have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign in here</a>
             </p>
          </form>
@@ -32,9 +32,6 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { useUserStore } from '@/stores/user';
-
-const userStore = useUserStore();
 
 const emailReg = ref('');
 const passwordReg = ref('');
@@ -84,51 +81,13 @@ const doLogin = () => {
 </script>
 
 <style scoped>
-.container {
-   margin: 0 auto;
-   padding: 0 1rem;
-}
-
 p {
    line-height: 2rem;
-}
-
-.btn {
-   background-color: rgb(10, 96, 50);
-   border: 1px solid rgb(6, 52, 28);
-   border-radius: 0;
-   color: #fff;
-   font-size: 1rem;
-   font-weight: 700;
-   margin-top: 10px;
-   padding: 10px 20px;
-   transition-duration: 0.4s;
-}
-
-.btn:hover {
-   background-color: rgb(6, 52, 28);
-   border: 1px solid rgb(10, 96, 50);
-   color: #fff;
 }
 
 .card {
    padding: 30px;
    background-color: rgb(37, 37, 37);
-}
-
-.form-group {
-   display: flex;
-   flex-direction: column;
-}
-
-.form-control {
-  margin-bottom: 20px;
-  padding: 12px 10px;
-}
-
-.form-control:focus {
-  border-color: rgb(10, 96, 50);
-  box-shadow: 0 0 0 0.2rem rgb(10, 96, 50);
 }
 
 .login-page {
