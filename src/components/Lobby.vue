@@ -69,7 +69,11 @@ onBeforeUnmount(() => {
     <button @click="onStartGame">Start Game</button>
     <input type="text" v-model="word" />
   </div>
-  <h2>Participants<span v-if="amIAdmin"> - check for whites</span></h2>
+  <h2>
+    Participants - 
+    <span v-if="amIAdmin">check for whites</span>
+    <span v-else>wait for the game to start</span>
+  </h2>
   <ul>
     <li v-for="email, uid in participants" :key="uid">
       <input @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" v-if="amIAdmin" />
