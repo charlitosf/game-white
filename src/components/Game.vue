@@ -53,7 +53,6 @@ onBeforeUnmount(() => {
 .container-fullscreen {
   display: flex;
   height: 75vh;
-  width: 90vw;
   font-size: 5rem;
 }
 
