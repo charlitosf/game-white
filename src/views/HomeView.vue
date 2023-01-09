@@ -35,8 +35,8 @@ const onStartGame = async () => {
         [userStore.user?.uid!]: userStore.user?.email
       },
       gameStarted: false,
-      // White players: []
-      // Word: ''
+      word: '',
+      // whitePlayers: { uid: true, }
     };
 
     if (currentData === null) {

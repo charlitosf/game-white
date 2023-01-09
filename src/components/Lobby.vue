@@ -1,29 +1,40 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/user';
 import { child, getDatabase, onChildAdded, onChildRemoved, onValue, ref as fRef, set } from '@firebase/database';
-import { onBeforeUnmount, ref, type Ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue';
 
 const userStore = useUserStore();
 const props = defineProps<{
   id: string | string[];
 }>();
-const participants: Ref<string[]> = ref([]);
+const participants: Ref<{[uid: string]: string}> = ref({});
+const whites: Ref<{ [uid: string]: boolean }> = ref({
+  // uid: true
+});
 const word = ref('');
 const admin = ref('');
 
 const db = getDatabase();
 const gameRef = fRef(db, `${props.id}`);
 const participantsRef = child(gameRef, 'participants');
+const whitesRef = child(gameRef, 'whitePlayers');
 
-const addedOff = onChildAdded(participantsRef, (snapshot) => {
-  participants.value.push(snapshot.val());
+const amIAdmin = computed(() => admin.value == userStore.user?.uid);
+
+const addedParticipantOff = onChildAdded(participantsRef, (snapshot) => {
+  participants.value[snapshot.key!] = snapshot.val();
 });
 
-const removedOff = onChildRemoved(participantsRef, (snapshot) => {
-  const index = participants.value.indexOf(snapshot.val());
-  if (index > -1) {
-    participants.value.splice(index, 1);
-  }
+const removedParticipantOff = onChildRemoved(participantsRef, (snapshot) => {
+  delete participants.value[snapshot.key!];
+});
+
+const addedWhiteOff = onChildAdded(whitesRef, (snapshot) => {
+  whites.value[snapshot.key!] = true;
+});
+
+const removedWhiteOff = onChildRemoved(whitesRef, (snapshot) => {
+  delete whites.value[snapshot.key!];
 });
 
 const adminOff = onValue(child(gameRef, 'admin'), (snapshot) => {
@@ -35,23 +46,34 @@ const onStartGame = () => {
   set(child(gameRef, 'word'), word.value);
 };
 
+const onParticipantClicked = (participantUid: string) => {
+  if (whites.value[participantUid]) {
+    set(child(whitesRef, participantUid), null);
+  } else {
+    set(child(whitesRef, participantUid), true);
+  }
+}
+
 onBeforeUnmount(() => {
-  addedOff();
-  removedOff();
+  addedParticipantOff();
+  removedParticipantOff();
   adminOff();
+  addedWhiteOff();
+  removedWhiteOff();
 });
 </script>
 
 <template>
   <h1>Lobby of game {{ props.id }}</h1>
-  <div v-if="admin == userStore.user?.uid">
+  <div v-if="amIAdmin">
     <button @click="onStartGame">Start Game</button>
     <input type="text" v-model="word" />
   </div>
-  <h2>Participants</h2>
+  <h2>Participants<span v-if="amIAdmin"> - check for whites</span></h2>
   <ul>
-    <li v-for="participant in participants" :key="participant">
-      {{ participant }}
+    <li v-for="email, uid in participants" :key="uid">
+      <input @change="onParticipantClicked(uid)" :checked="whites[uid]" type="checkbox" v-if="amIAdmin" />
+      {{ email }}
     </li>
   </ul>
 </template>
