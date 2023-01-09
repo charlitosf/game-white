@@ -9,6 +9,7 @@ const props = defineProps<{
   id: string | string[];
 }>();
 const participants: Ref<string[]> = ref([]);
+const word = ref('');
 
 const db = getDatabase();
 const gameRef = fRef(db, `games/${props.id}`);
@@ -28,6 +29,7 @@ const removedOff = onChildRemoved(gameRef, (snapshot) => {
 const onStartGame = () => {
   set(ownGameRef, {
     gameStarted: true,
+    word: word.value,
   });
 };
 
@@ -40,6 +42,7 @@ onBeforeUnmount(() => {
 <template>
   <h1>Lobby of game {{ props.id }}</h1>
   <button @click="onStartGame">Start Game</button>
+  <input type="text" v-model="word" />
   <h2>Participants</h2>
   <ul>
     <li v-for="participant in participants" :key="participant">
