@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/user';
-import { child, getDatabase, onChildAdded, onChildRemoved, onValue, ref as fRef, set } from '@firebase/database';
+import { child, getDatabase, onChildAdded, onChildRemoved, onValue, ref as fRef, set, update } from '@firebase/database';
 import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue';
 
 const userStore = useUserStore();
@@ -58,6 +58,14 @@ const onKick = (participantUid: string) => {
   set(child(participantsRef, participantUid), null);
 };
 
+const onMakeAdmin = (participantUid: string) => {
+  const updates: {[path: string]: any} = {};
+  updates['/admin'] = participantUid;
+  updates[`/participants/${userStore.user?.uid}`] = userStore.user?.email;
+  updates[`/participants/${participantUid}`] = null;
+  update(gameRef, updates);
+};
+
 onBeforeUnmount(() => {
   addedParticipantOff();
   removedParticipantOff();
@@ -83,6 +91,7 @@ onBeforeUnmount(() => {
       <input v-if="amIAdmin" @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
       {{ email }}
       <button v-if="amIAdmin" @click="onKick(uid.toString())">Kick</button>
+      <button v-if="amIAdmin" @click="onMakeAdmin(uid.toString())">Make admin</button>
     </li>
   </ul>
 </template>
