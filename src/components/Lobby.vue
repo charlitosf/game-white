@@ -97,7 +97,7 @@ onBeforeUnmount(() => {
       <span v-if="amIAdmin">select whites</span>
       <span v-else>wait for the game to start</span>
     </h2>
-    <div class="flex spread vertical-centered background-container align-end" v-for="email, uid in participants" :key="uid">
+    <div :class="{'align-end': amIAdmin}" class="flex spread vertical-centered background-container" v-for="email, uid in participants" :key="uid">
       <label v-if="amIAdmin" class="switch">
         <input @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
         <span class="slider round"></span>
