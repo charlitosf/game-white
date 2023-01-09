@@ -52,7 +52,11 @@ const onParticipantClicked = (participantUid: string) => {
   } else {
     set(child(whitesRef, participantUid), true);
   }
-}
+};
+
+const onKick = (participantUid: string) => {
+  set(child(participantsRef, participantUid), null);
+};
 
 onBeforeUnmount(() => {
   addedParticipantOff();
@@ -76,8 +80,9 @@ onBeforeUnmount(() => {
   </h2>
   <ul>
     <li v-for="email, uid in participants" :key="uid">
-      <input @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" v-if="amIAdmin" />
+      <input v-if="amIAdmin" @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
       {{ email }}
+      <button v-if="amIAdmin" @click="onKick(uid.toString())">Kick</button>
     </li>
   </ul>
 </template>
