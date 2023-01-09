@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { getDatabase, ref as fRef, runTransaction, onChildAdded, onChildRemoved, update } from 'firebase/database';
+import { getDatabase, ref as fRef, runTransaction, onChildAdded, onChildRemoved, update, set, child, onValue } from 'firebase/database';
 import { useUserStore } from '@/stores/user';
 import { generate4DigitRandomNumber } from '@/utils/utils';
 import { ref, type Ref } from 'vue';
@@ -9,16 +9,17 @@ const router = useRouter();
 const userStore = useUserStore();
 const db = getDatabase();
 const rootRef = fRef(db);
-const userRef = fRef(db, userStore.user?.uid);
 
 const currentGames: Ref<string[]> = ref([]);
 const gameId = ref('');
 
-onChildAdded(userRef, (snapshot) => {
-  currentGames.value.push(snapshot.key!);
+onChildAdded(rootRef, (snapshot) => {
+  if (snapshot.val().admin === userStore.user?.uid) {
+    currentGames.value.push(snapshot.key!);
+  }
 });
 
-onChildRemoved(userRef, (snapshot) => {
+onChildRemoved(rootRef, (snapshot) => {
   const index = currentGames.value.indexOf(snapshot.key!);
   if (index > -1) {
     currentGames.value.splice(index, 1);
@@ -26,61 +27,46 @@ onChildRemoved(userRef, (snapshot) => {
 });
 
 const onStartGame = async () => {
-  const rootRef = fRef(db);
-  let gameCode: string = '';
+  let gameCode: string = generate4DigitRandomNumber();
   await runTransaction(rootRef, (currentData) => {
+    const gameObject = {
+      admin: userStore.user?.uid,
+      participants: {
+        [userStore.user?.uid!]: userStore.user?.email
+      },
+      gameStarted: false,
+      // White players: []
+      // Word: ''
+    };
+
     if (currentData === null) {
-      gameCode = generate4DigitRandomNumber();
       return {
-        games: {
-          [gameCode]: {
-            [userStore.user?.uid!]: userStore.user?.email
-          }
-        },
-        [userStore.user?.uid!]: {
-          [gameCode]: {
-            gameStarted: false,
-            // White players: []
-            // Word: ''
-          },
-        },
+        [gameCode]: gameObject,
       };
     } else {
-      let existingGames: string[] = [];
-      if (currentData.games) {
-        existingGames = Object.keys(currentData.games);
-      }
-      let gameCode = generate4DigitRandomNumber();
+      const existingGames = Object.keys(currentData);
       while (existingGames.includes(gameCode)) {
         gameCode = generate4DigitRandomNumber();
       }
-      currentData.games[gameCode] = {
-        [userStore.user?.uid!]: userStore.user?.email
-      };
-      currentData[userStore.user?.uid!][gameCode] = {
-        gameStarted: false,
-        // White players: []
-        // Word: ''
-      };
+      currentData[gameCode] = gameObject;
       return currentData;
     }
-  })
+  });
   router.push(`/games/${gameCode}`);
 };
 
 const onJoinGame = () => {
+  const gameRef = fRef(db, `${gameId.value}`);
+  const gameUserRef = child(gameRef, `participants/${userStore.user?.uid!}`);
+  set(gameUserRef, userStore.user?.email);
   router.push(`/games/${gameId.value}`);
 };
 
 const onDeleteGame = (gameIndex: number) => {
   const gameCode = currentGames.value[gameIndex];
 
-  const updates: {[id: string]: null} = {};
-  updates[`/games/${gameCode}`] = null;
-  updates[`/${userStore.user?.uid!}/${gameCode}`] = null;
-
-  update(rootRef, updates);
-
+  const gameRef = fRef(db, `${gameCode}`);
+  set(gameRef, null);
 };
 </script>
 
