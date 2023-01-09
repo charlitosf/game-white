@@ -119,4 +119,14 @@ div a.router-link-exact-active:hover {
 .mb-2 {
   margin-bottom: 2rem;
 }
+
+.ml-auto {
+  margin-left: auto;
+}
+.ml-1 {
+  margin-left: 1rem;
+}
+.ml-2 {
+  margin-left: 2rem;
+}
 </style>

@@ -81,22 +81,91 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <h1>Lobby of game {{ props.id }}</h1>
-  <div v-if="amIAdmin">
-    <button @click="onStartGame">Start Game</button>
-    <input type="text" v-model="word" />
+  <div class="container title">
+    Lobby of game: {{ props.id }}
   </div>
-  <h2>
-    Participants - 
-    <span v-if="amIAdmin">check for whites</span>
-    <span v-else>wait for the game to start</span>
-  </h2>
-  <ul>
-    <li v-for="email, uid in participants" :key="uid">
-      <input v-if="amIAdmin" @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
-      {{ email }}
-      <button v-if="amIAdmin" @click="onKick(uid.toString())">Kick</button>
-      <button v-if="amIAdmin" @click="onMakeAdmin(uid.toString())">Make admin</button>
-    </li>
-  </ul>
+  <div class="container mb-1">
+    <form v-if="amIAdmin" class="inline-form-group">
+      <input placeholder="Hidden word" type="text" v-model="word" class="inline-form-control"/>
+      <button @click="onStartGame" class="btn btn-primary">Start Game</button>
+    </form>
+  </div>
+  <div class="container">
+    <h2>
+      Participants - 
+      <span v-if="amIAdmin">select whites</span>
+      <span v-else>wait for the game to start</span>
+    </h2>
+    <div class="flex spread vertical-centered background-container" v-for="email, uid in participants" :key="uid">
+      <label v-if="amIAdmin" class="switch">
+        <input @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
+        <span class="slider round"></span>
+      </label>
+      <span :class="amIAdmin ? 'ml-1' : ''">{{ email }}</span>
+      <button v-if="amIAdmin" @click="onKick(uid.toString())" class="btn btn-danger ml-auto">Kick</button>
+      <button v-if="amIAdmin" @click="onMakeAdmin(uid.toString())" class="btn btn-primary">Make admin</button>
+    </div>
+  </div>
 </template>
+
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>

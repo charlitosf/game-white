@@ -110,7 +110,7 @@ const onDeleteGame = (gameIndex: number) => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .spread {
   justify-content: space-between;
 }
