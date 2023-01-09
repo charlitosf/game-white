@@ -9,13 +9,13 @@ const props = defineProps<{
 }>();
 const game: Ref<{
   gameStarted: boolean;
-  whitePlayers: string[];
+  whitePlayers: { [uid: string]: boolean };
   word: string;
   participants: string[];
   admin: string;
 }> = ref({
   gameStarted: false,
-  whitePlayers: [],
+  whitePlayers: {},
   word: '',
   participants: [],
   admin: '',
@@ -41,7 +41,7 @@ onBeforeUnmount(() => {
   <button v-if="game.admin == userStore.user?.uid" @click="onEndGame">End Game</button>
   <h1>
     The word is 
-    <span v-if="game.whitePlayers != null && game.whitePlayers.includes(userStore.user?.uid!)">Blanco :·)</span>
+    <span v-if="game.whitePlayers != null && game.whitePlayers[userStore.user?.uid!]">Blanco :·)</span>
     <span v-else>{{ game.word }}</span>
   </h1>
 </template>
