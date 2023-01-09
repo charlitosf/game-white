@@ -65,11 +65,11 @@ const onStartGame = async () => {
       return currentData;
     }
   })
-  router.push(`/lobbies/${gameCode}`);
+  router.push(`/games/${gameCode}`);
 };
 
 const onJoinGame = () => {
-  router.push(`/lobbies/${gameId.value}`);
+  router.push(`/games/${gameId.value}`);
 };
 
 const onDeleteGame = (gameIndex: number) => {
