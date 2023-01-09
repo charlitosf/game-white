@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { getDatabase, ref as fRef, runTransaction, onChildAdded, onChildRemoved, update, set, child, onValue } from 'firebase/database';
+import { getDatabase, ref as fRef, runTransaction, onChildAdded, onChildRemoved, set } from 'firebase/database';
 import { useUserStore } from '@/stores/user';
 import { generate4DigitRandomNumber } from '@/utils/utils';
 import { ref, type Ref } from 'vue';
@@ -93,7 +93,7 @@ const onDeleteGame = (gameIndex: number) => {
     Welcome to the game "White"!
     <button @click="onStartGame" class="btn btn-primary">Start new game</button>
   </div>
-  <div class="container">
+  <div class="container mb-1">
     <form @submit.prevent="onJoinGame" class="inline-form-group">
       <input type="text" v-model="gameId" class="inline-form-control" placeholder="Game code" />
       <button type="submit" class="btn btn-primary">Join game</button>
