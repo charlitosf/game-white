@@ -3,10 +3,8 @@ import { useUserStore } from '@/stores/user';
 import { computed } from '@vue/reactivity';
 import { child, getDatabase, onValue, ref as fRef, set } from 'firebase/database';
 import { onBeforeUnmount, ref, type Ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
-const router = useRouter();
 const props = defineProps<{
   id: string | string[];
 }>();
@@ -45,9 +43,23 @@ onBeforeUnmount(() => {
 
 <template>
   <button v-if="amIAdmin" @click="onEndGame" class="btn btn-danger">End Game</button>
-  <h1>
-    The word is 
-    <span v-if="game.whitePlayers != null && game.whitePlayers[userStore.user?.uid!]">Blanco :·)</span>
+  <div class="container-fullscreen centered">
+    <span v-if="game.whitePlayers != null && game.whitePlayers[userStore.user?.uid!]">White :)</span>
     <span v-else>{{ game.word }}</span>
-  </h1>
+  </div>
 </template>
+
+<style>
+.container-fullscreen {
+  display: flex;
+  height: 75vh;
+  width: 90vw;
+  font-size: 5rem;
+}
+
+.centered {
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+</style>
