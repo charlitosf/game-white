@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/stores/user';
 import { child, getDatabase, onChildAdded, onChildRemoved, onValue, ref as fRef, set, update } from '@firebase/database';
-import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue';
+import { computed, onBeforeUnmount, ref, type Ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
+const router = useRouter();
 const props = defineProps<{
   id: string | string[];
 }>();
@@ -27,6 +29,9 @@ const addedParticipantOff = onChildAdded(participantsRef, (snapshot) => {
 
 const removedParticipantOff = onChildRemoved(participantsRef, (snapshot) => {
   delete participants.value[snapshot.key!];
+  if (snapshot.key === userStore.user?.uid) {
+    router.push({ name: 'home'});
+  }
 });
 
 const addedWhiteOff = onChildAdded(whitesRef, (snapshot) => {
