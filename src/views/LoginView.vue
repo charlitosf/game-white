@@ -3,7 +3,7 @@
    <div class="wallpaper"></div>
 
    <div class="container">
-      <div v-if="!registerActive" class="card login" v-bind:class="{ error: emptyFields }">
+      <div v-if="!registerActive" class="card" v-bind:class="{ error: emptyFields }">
          <h1>Sign In</h1>
          <form class="form-group" @submit.prevent="doLogin">
             <input v-model="emailLogin" type="email" class="form-control" placeholder="Email" required>
@@ -14,7 +14,7 @@
          </form>
       </div>
 
-      <div v-else class="card register" v-bind:class="{ error: emptyFields }">
+      <div v-else class="card" v-bind:class="{ error: emptyFields }">
          <h1>Sign Up</h1>
          <form class="form-group" @submit.prevent="doRegister">
             <input v-model="emailReg" type="email" class="form-control" placeholder="Email" required>

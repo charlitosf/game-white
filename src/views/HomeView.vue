@@ -134,6 +134,7 @@ const onDeleteGame = (gameIndex: number) => {
   padding: 1rem;
   border-radius: 0.5rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
 .main-element {

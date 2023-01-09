@@ -51,7 +51,7 @@ div a.router-link-exact-active:hover {
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
-  margin-top: 10px;
+  /* margin-top: 10px; */
   padding: 10px 20px;
   transition-duration: 0.4s;
 }
@@ -96,15 +96,26 @@ div a.router-link-exact-active:hover {
 
 .form-control {
   margin-bottom: 20px;
-  padding: 12px 12px;
+  padding: 9px 12px;
 }
 
 .inline-form-control {
-  padding: 10px 12px;
+  padding: 9px 12px;
   flex-grow: 1;
 }
 
-.form-control:focus {
+@media (width <= 768px) {
+  .inline-form-control {
+    margin-bottom: 20px;
+  }
+
+  .inline-form-group {
+    flex-direction: column;
+    align-items: unset;
+  }
+}
+
+.form-control:focus, .inline-form-control:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 0.2rem var(--color-primary);
 }
@@ -128,5 +139,15 @@ div a.router-link-exact-active:hover {
 }
 .ml-2 {
   margin-left: 2rem;
+}
+
+.mr-auto {
+  margin-right: auto;
+}
+.mr-1 {
+  margin-right: 1rem;
+}
+.mr-2 {
+  margin-right: 2rem;
 }
 </style>

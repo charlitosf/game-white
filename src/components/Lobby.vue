@@ -84,27 +84,25 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="container title">
+  <div class="container title mb-1">
     Lobby of game: {{ props.id }}
   </div>
-  <div class="container mb-1">
-    <form v-if="amIAdmin" class="inline-form-group">
-      <input placeholder="Hidden word" type="text" v-model="word" class="inline-form-control"/>
-      <button @click="onStartGame" class="btn btn-primary">Start Game</button>
-    </form>
-  </div>
+  <form v-if="amIAdmin" class="inline-form-group mb-2">
+    <input placeholder="Hidden word" type="text" v-model="word" class="inline-form-control"/>
+    <button @click="onStartGame" class="btn btn-primary">Start Game</button>
+  </form>
   <div class="container">
-    <h2>
+    <h2 class="mb-1">
       Participants - 
       <span v-if="amIAdmin">select whites</span>
       <span v-else>wait for the game to start</span>
     </h2>
-    <div class="flex spread vertical-centered background-container" v-for="email, uid in participants" :key="uid">
+    <div class="flex spread vertical-centered background-container align-end" v-for="email, uid in participants" :key="uid">
       <label v-if="amIAdmin" class="switch">
         <input @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
         <span class="slider round"></span>
       </label>
-      <span :class="amIAdmin ? 'ml-1' : ''">{{ email }}</span>
+      <span :class="{'ml-1': amIAdmin}" class="fs-1 mr-1">{{ email }}</span>
       <button v-if="amIAdmin" @click="onKick(uid.toString())" class="btn btn-danger ml-auto">Kick</button>
       <button v-if="amIAdmin" @click="onMakeAdmin(uid.toString())" class="btn btn-primary">Make admin</button>
     </div>
@@ -112,6 +110,13 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
+.align-end {
+  justify-content: flex-end;
+}
+
+.fs-1 {
+  font-size: 1rem;
+}
 .switch {
   position: relative;
   display: inline-block;
@@ -132,7 +137,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--color-background);
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -144,17 +149,17 @@ onBeforeUnmount(() => {
   width: 26px;
   left: 4px;
   bottom: 4px;
-  background-color: white;
+  background-color: var(--color-heading);
   -webkit-transition: .4s;
   transition: .4s;
 }
 
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: var(--color-primary);
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px var(--color-primary);
 }
 
 input:checked + .slider:before {
