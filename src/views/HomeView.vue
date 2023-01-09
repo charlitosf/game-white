@@ -31,9 +31,6 @@ const onStartGame = async () => {
   await runTransaction(rootRef, (currentData) => {
     const gameObject = {
       admin: userStore.user?.uid,
-      participants: {
-        [userStore.user?.uid!]: userStore.user?.email
-      },
       gameStarted: false,
       word: '',
       // whitePlayers: { uid: true, }
