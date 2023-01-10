@@ -25,10 +25,10 @@ export const useGameStore = defineStore('game', () => {
     updates[`participants/${userStore.user?.uid}`] = null;
     updates[`whitePlayers/${userStore.user?.uid}`] = null;
     update(gameRef, updates);
-    stopGame();
+    detachGame();
   }
 
-  function startGame(id: string) {
+  function attachGame(id: string) {
     gameId.value = id;
     
     const gameRef = fRef(db, gameId.value);
@@ -52,7 +52,7 @@ export const useGameStore = defineStore('game', () => {
     offFuncs.push(onChildRemoved(participantsRef, (snapshot) => {
       delete players.value[snapshot.key!];
       if (snapshot.key === userStore.user?.uid) {
-        stopGame();
+        detachGame();
       }
     }));
     offFuncs.push(onChildAdded(whitesRef, (snapshot) => {
@@ -63,7 +63,7 @@ export const useGameStore = defineStore('game', () => {
     }));
   }
 
-  function stopGame() {
+  function detachGame() {
     offFuncs.forEach((offFunc) => offFunc());
     offFuncs.length = 0;
     
@@ -75,6 +75,6 @@ export const useGameStore = defineStore('game', () => {
     whitePlayers.value = {};
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, startGame, stopGame, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, attachGame, detachGame, leaveGame }
 })
   

@@ -7,7 +7,7 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const gameStore = useGameStore();
-gameStore.startGame(route.params.id.toString());
+gameStore.attachGame(route.params.id.toString());
 
 const onLeaveGame = () => {
   gameStore.leaveGame();
