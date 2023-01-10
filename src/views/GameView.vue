@@ -2,12 +2,16 @@
 import Game from '@/components/Game.vue';
 import Lobby from '@/components/Lobby.vue';
 import { useGameStore } from '@/stores/game';
+import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
 const router = useRouter();
 const gameStore = useGameStore();
-gameStore.attachGame(route.params.id.toString());
+
+onMounted(() => {
+  gameStore.attachGame(route.params.id.toString());
+});
 
 const onLeaveGame = () => {
   gameStore.leaveGame();
