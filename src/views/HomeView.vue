@@ -1,83 +1,33 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { getDatabase, ref as fRef, runTransaction, set } from 'firebase/database';
-import { useUserStore } from '@/stores/user';
-import { generate4DigitRandomNumber } from '@/utils/utils';
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useGameStore } from '@/stores/game';
 
 const router = useRouter();
-const userStore = useUserStore();
 const gameStore = useGameStore();
 
 onMounted(() => {
   gameStore.attachGameList();
 });
 
-const db = getDatabase();
-const rootRef = fRef(db);
-
 const gameId = ref('');
 
 const onStartGame = async () => {
-  let gameCode: string = generate4DigitRandomNumber();
-  await runTransaction(rootRef, (currentData) => {
-    const gameObject = {
-      admin: userStore.user?.uid,
-      gameStarted: false,
-      word: '',
-      // whitePlayers: { uid: true, }
-    };
-
-    if (currentData === null) {
-      return {
-        [gameCode]: gameObject,
-      };
-    } else {
-      const existingGames = Object.keys(currentData);
-      while (existingGames.includes(gameCode)) {
-        gameCode = generate4DigitRandomNumber();
-      }
-      currentData[gameCode] = gameObject;
-      return currentData;
-    }
-  });
+  const gameCode = await gameStore.createGame();
   router.push(`/games/${gameCode}`);
 };
 
 const onJoinGame = async () => {
-  const gameRef = fRef(db, `${gameId.value}`);
-  try {
-    const result = await runTransaction(gameRef, (currentData) => {
-      if (currentData === null) {
-        return;
-      } else if (currentData.admin === userStore.user?.uid) {
-        return currentData;
-      } else if (currentData.gameStarted) {
-        return;
-      } else if (currentData.admin !== userStore.user?.uid) {
-        currentData.participants = {
-          ...currentData.participants,
-          [userStore.user?.uid!]: userStore.user?.email,
-        };
-        return currentData;
-      }
-    });
-    if (result.committed) {
-      router.push(`/games/${gameId.value}`);
-    } else {
-      alert('Game does not exist or has already started!');
-    }
-  } catch (error) {
-    alert('Game does not exist or has already started!')
+  const successful = await gameStore.joinGame(gameId.value);
+  if (successful) {
+    router.push(`/games/${gameId.value}`);
+  } else {
+    alert('Game does not exist or has already started!');
   }
 };
 
 const onDeleteGame = (gameIndex: number) => {
-  const gameCode = gameStore.gameList[gameIndex];
-
-  const gameRef = fRef(db, `${gameCode}`);
-  set(gameRef, null);
+  gameStore.deleteGame(gameIndex);
 };
 
 onBeforeUnmount(() => {

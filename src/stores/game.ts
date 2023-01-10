@@ -1,4 +1,5 @@
-import { getDatabase, child, onValue, onChildAdded, onChildRemoved, ref as fRef, update } from "firebase/database";
+import { generate4DigitRandomNumber } from "@/utils/utils";
+import { getDatabase, child, onValue, onChildAdded, onChildRemoved, ref as fRef, update, runTransaction, set } from "firebase/database";
 import { defineStore } from "pinia"
 import { computed, ref, type Ref } from "vue"
 import { useUserStore } from "./user"
@@ -20,6 +21,60 @@ export const useGameStore = defineStore('game', () => {
   const gameList: Ref<string[]> = ref([])
 
   const amIAdmin = computed(() => admin.value == userStore.user?.uid)
+
+  async function createGame() {
+    const rootRef = fRef(db);
+    let gameCode: string = generate4DigitRandomNumber();
+    await runTransaction(rootRef, (currentData) => {
+      const gameObject = {
+        admin: userStore.user?.uid,
+        gameStarted: false,
+        word: '',
+        // whitePlayers: { uid: true, }
+      };
+
+      if (currentData === null) {
+        return {
+          [gameCode]: gameObject,
+        };
+      } else {
+        const existingGames = Object.keys(currentData);
+        while (existingGames.includes(gameCode)) {
+          gameCode = generate4DigitRandomNumber();
+        }
+        currentData[gameCode] = gameObject;
+        return currentData;
+      }
+    });
+    return gameCode;
+  }
+
+  function deleteGame(gameIndex: number) {
+    const gameCode = gameList.value[gameIndex];
+
+    const gameRef = fRef(db, `${gameCode}`);
+    set(gameRef, null);
+  }
+
+  async function joinGame(id: string) {
+    const gameRef = fRef(db, id);
+    const result = await runTransaction(gameRef, (currentData) => {
+      if (currentData === null) {
+        return;
+      } else if (currentData.admin === userStore.user?.uid) {
+        return currentData;
+      } else if (currentData.gameStarted) {
+        return;
+      } else if (currentData.admin !== userStore.user?.uid) {
+        currentData.participants = { // Also works if participants is undefined
+          ...currentData.participants,
+          [userStore.user?.uid!]: userStore.user?.email,
+        }
+        return currentData;
+      }
+    });
+    return result.committed;
+  }
 
   function leaveGame() {
     const gameRef = fRef(db, gameId.value!);
@@ -101,6 +156,6 @@ export const useGameStore = defineStore('game', () => {
     gameList.value = [];
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, joinGame, leaveGame }
 })
   
