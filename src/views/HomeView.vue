@@ -1,30 +1,23 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { getDatabase, ref as fRef, runTransaction, onChildAdded, onChildRemoved, set } from 'firebase/database';
+import { getDatabase, ref as fRef, runTransaction, set } from 'firebase/database';
 import { useUserStore } from '@/stores/user';
 import { generate4DigitRandomNumber } from '@/utils/utils';
-import { ref, type Ref } from 'vue';
+import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { useGameStore } from '@/stores/game';
 
 const router = useRouter();
 const userStore = useUserStore();
+const gameStore = useGameStore();
+
+onMounted(() => {
+  gameStore.attachGameList();
+});
+
 const db = getDatabase();
 const rootRef = fRef(db);
 
-const currentGames: Ref<string[]> = ref([]);
 const gameId = ref('');
-
-onChildAdded(rootRef, (snapshot) => {
-  if (snapshot.val().admin === userStore.user?.uid) {
-    currentGames.value.push(snapshot.key!);
-  }
-});
-
-onChildRemoved(rootRef, (snapshot) => {
-  const index = currentGames.value.indexOf(snapshot.key!);
-  if (index > -1) {
-    currentGames.value.splice(index, 1);
-  }
-});
 
 const onStartGame = async () => {
   let gameCode: string = generate4DigitRandomNumber();
@@ -81,11 +74,15 @@ const onJoinGame = async () => {
 };
 
 const onDeleteGame = (gameIndex: number) => {
-  const gameCode = currentGames.value[gameIndex];
+  const gameCode = gameStore.gameList[gameIndex];
 
   const gameRef = fRef(db, `${gameCode}`);
   set(gameRef, null);
 };
+
+onBeforeUnmount(() => {
+  gameStore.detachGameList();
+});
 </script>
 
 <template>
@@ -100,9 +97,9 @@ const onDeleteGame = (gameIndex: number) => {
     </form>
   </div>
   <div class="container">
-    <h2 v-if="currentGames.length > 0">My currently started games:</h2>
+    <h2 v-if="gameStore.gameList.length > 0">My currently started games:</h2>
     <h2 v-else>You have not started any games yet!</h2>
-    <div class="flex vertical-baselined background-container" v-for="game, index in currentGames" :key="index">
+    <div class="flex vertical-baselined background-container" v-for="game, index in gameStore.gameList" :key="index">
       <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
       <button @click="onDeleteGame(index)" class="btn btn-danger">Delete</button>
     </div>
