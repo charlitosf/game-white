@@ -124,6 +124,13 @@ div a.router-link-exact-active:hover {
   display: flex;
 }
 
+.mt-1 {
+  margin-top: 1rem;
+}
+.mt-2 {
+  margin-top: 2rem;
+}
+
 .mb-1 {
   margin-bottom: 1rem;
 }

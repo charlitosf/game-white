@@ -11,6 +11,11 @@ import { initializeApp } from "firebase/app";
 import './assets/main.css'
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons'
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -43,5 +48,8 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+library.add(faEnvelope, faLinkedin, faGithub);
+
+app.component('font-awesome-icon', FontAwesomeIcon)
 app.mount('#app')
 
