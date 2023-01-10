@@ -1,50 +1,20 @@
 <script lang="ts" setup>
+import { useGameStore } from '@/stores/game';
 import { useUserStore } from '@/stores/user';
-import { child, getDatabase, onChildAdded, onChildRemoved, onValue, ref as fRef, set, update } from '@firebase/database';
-import { computed, onBeforeUnmount, ref, type Ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { child, getDatabase, ref as fRef, set, update } from '@firebase/database';
+import { ref } from 'vue';
 
+const gameStore = useGameStore();
 const userStore = useUserStore();
-const router = useRouter();
+
 const props = defineProps<{
   id: string | string[];
 }>();
-const participants: Ref<{[uid: string]: string}> = ref({});
-const whites: Ref<{ [uid: string]: boolean }> = ref({
-  // uid: true
-});
 const word = ref('');
-const admin = ref('');
 
 const db = getDatabase();
 const gameRef = fRef(db, `${props.id}`);
-const participantsRef = child(gameRef, 'participants');
 const whitesRef = child(gameRef, 'whitePlayers');
-
-const amIAdmin = computed(() => admin.value == userStore.user?.uid);
-
-const addedParticipantOff = onChildAdded(participantsRef, (snapshot) => {
-  participants.value[snapshot.key!] = snapshot.val();
-});
-
-const removedParticipantOff = onChildRemoved(participantsRef, (snapshot) => {
-  delete participants.value[snapshot.key!];
-  if (snapshot.key === userStore.user?.uid) {
-    router.push({ name: 'home'});
-  }
-});
-
-const addedWhiteOff = onChildAdded(whitesRef, (snapshot) => {
-  whites.value[snapshot.key!] = true;
-});
-
-const removedWhiteOff = onChildRemoved(whitesRef, (snapshot) => {
-  delete whites.value[snapshot.key!];
-});
-
-const adminOff = onValue(child(gameRef, 'admin'), (snapshot) => {
-  admin.value = snapshot.val();
-});
 
 const onStartGame = () => {
   set(child(gameRef, 'gameStarted'), true);
@@ -52,7 +22,7 @@ const onStartGame = () => {
 };
 
 const onParticipantClicked = (participantUid: string) => {
-  if (whites.value[participantUid]) {
+  if (gameStore.whitePlayers[participantUid]) {
     set(child(whitesRef, participantUid), null);
   } else {
     set(child(whitesRef, participantUid), true);
@@ -74,37 +44,30 @@ const onMakeAdmin = (participantUid: string) => {
   update(gameRef, updates);
 };
 
-onBeforeUnmount(() => {
-  addedParticipantOff();
-  removedParticipantOff();
-  adminOff();
-  addedWhiteOff();
-  removedWhiteOff();
-});
 </script>
 
 <template>
   <div class="container title mb-1">
     Lobby of game: {{ props.id }}
   </div>
-  <form v-if="amIAdmin" class="inline-form-group mb-2">
+  <form v-if="gameStore.amIAdmin" class="inline-form-group mb-2">
     <input placeholder="Hidden word" type="text" v-model="word" class="inline-form-control"/>
     <button @click="onStartGame" class="btn btn-primary">Start Game</button>
   </form>
   <div class="container">
     <h2 class="mb-1">
       Participants - 
-      <span v-if="amIAdmin">select whites</span>
+      <span v-if="gameStore.amIAdmin">select whites</span>
       <span v-else>wait for the game to start</span>
     </h2>
-    <div :class="{'align-end': amIAdmin}" class="flex spread vertical-centered background-container" v-for="email, uid in participants" :key="uid">
-      <label v-if="amIAdmin" class="switch">
-        <input @change="onParticipantClicked(uid.toString())" :checked="whites[uid]" type="checkbox" />
+    <div :class="{'align-end': gameStore.amIAdmin}" class="flex spread vertical-centered background-container" v-for="email, uid in gameStore.players" :key="uid">
+      <label v-if="gameStore.amIAdmin" class="switch">
+        <input @change="onParticipantClicked(uid.toString())" :checked="gameStore.whitePlayers[uid]" type="checkbox" />
         <span class="slider round"></span>
       </label>
-      <span :class="{'ml-1': amIAdmin}" class="fs-1 mr-1">{{ email }}</span>
-      <button v-if="amIAdmin" @click="onKick(uid.toString())" class="btn btn-danger ml-auto">Kick</button>
-      <button v-if="amIAdmin" @click="onMakeAdmin(uid.toString())" class="btn btn-primary">Make admin</button>
+      <span :class="{'ml-1': gameStore.amIAdmin}" class="fs-1 mr-1">{{ email }}</span>
+      <button v-if="gameStore.amIAdmin" @click="onKick(uid.toString())" class="btn btn-danger ml-auto">Kick</button>
+      <button v-if="gameStore.amIAdmin" @click="onMakeAdmin(uid.toString())" class="btn btn-primary">Make admin</button>
     </div>
   </div>
 </template>
