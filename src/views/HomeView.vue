@@ -100,9 +100,8 @@ const onDeleteGame = (gameIndex: number) => {
     </form>
   </div>
   <div class="container">
-    <h2>
-      My currently started games:
-    </h2>
+    <h2 v-if="currentGames.length > 0">My currently started games:</h2>
+    <h2 v-else>You have not started any games yet!</h2>
     <div class="flex vertical-baselined background-container" v-for="game, index in currentGames" :key="index">
       <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
       <button @click="onDeleteGame(index)" class="btn btn-danger">Delete</button>
