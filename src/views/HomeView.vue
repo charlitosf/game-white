@@ -47,7 +47,7 @@ onBeforeUnmount(() => {
     </form>
   </div>
   <div class="container">
-    <h2 v-if="gameStore.gameList.length > 0">My currently started games:</h2>
+    <h2 v-if="!gameStore.isEmptyGameList">My currently started games:</h2>
     <h2 v-else>You have not started any games yet!</h2>
     <div class="flex vertical-baselined background-container" v-for="game, index in gameStore.gameList" :key="index">
       <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>

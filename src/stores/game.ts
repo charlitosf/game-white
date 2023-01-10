@@ -21,6 +21,7 @@ export const useGameStore = defineStore('game', () => {
   const gameList: Ref<string[]> = ref([])
 
   const amIAdmin = computed(() => admin.value == userStore.user?.uid)
+  const isEmptyGameList = computed(() => gameList.value.length == 0)
 
   async function createGame() {
     const rootRef = fRef(db);
@@ -198,6 +199,6 @@ export const useGameStore = defineStore('game', () => {
     gameList.value = [];
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, gameList, amIAdmin, isEmptyGameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
 })
   
