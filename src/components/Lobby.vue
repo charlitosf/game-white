@@ -1,54 +1,32 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/stores/game';
-import { useUserStore } from '@/stores/user';
-import { child, getDatabase, ref as fRef, set, update } from '@firebase/database';
 import { ref } from 'vue';
 
 const gameStore = useGameStore();
-const userStore = useUserStore();
 
-const props = defineProps<{
-  id: string | string[];
-}>();
 const word = ref('');
 
-const db = getDatabase();
-const gameRef = fRef(db, `${props.id}`);
-const whitesRef = child(gameRef, 'whitePlayers');
-
 const onStartGame = () => {
-  set(child(gameRef, 'gameStarted'), true);
-  set(child(gameRef, 'word'), word.value);
+  gameStore.startGame(word.value);
 };
 
 const onParticipantClicked = (participantUid: string) => {
-  if (gameStore.whitePlayers[participantUid]) {
-    set(child(whitesRef, participantUid), null);
-  } else {
-    set(child(whitesRef, participantUid), true);
-  }
+  gameStore.toggleWhitePlayer(participantUid);
 };
 
 const onKick = (participantUid: string) => {
-  const updates: {[path: string]: any} = {};
-  updates[`/participants/${participantUid}`] = null;
-  updates[`/whitePlayers/${participantUid}`] = null;
-  update(gameRef, updates);
+  gameStore.leaveGame(participantUid);
 };
 
 const onMakeAdmin = (participantUid: string) => {
-  const updates: {[path: string]: any} = {};
-  updates['/admin'] = participantUid;
-  updates[`/participants/${userStore.user?.uid}`] = userStore.user?.email;
-  updates[`/participants/${participantUid}`] = null;
-  update(gameRef, updates);
+  gameStore.makeAdmin(participantUid);
 };
 
 </script>
 
 <template>
   <div class="container title mb-1">
-    Lobby of game: {{ props.id }}
+    Lobby of game: {{ gameStore.gameId }}
   </div>
   <form v-if="gameStore.amIAdmin" class="inline-form-group mb-2">
     <input placeholder="Hidden word" type="text" v-model="word" class="inline-form-control"/>

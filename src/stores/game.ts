@@ -76,16 +76,39 @@ export const useGameStore = defineStore('game', () => {
     return result.committed;
   }
 
-  function leaveGame() {
+  function leaveGame(userId?: string) {
+    userId = userId || userStore.user?.uid;
+
     const gameRef = fRef(db, gameId.value!);
+
     const updates: {[path: string]: any} = {};
-    updates[`participants/${userStore.user?.uid}`] = null;
-    updates[`whitePlayers/${userStore.user?.uid}`] = null;
+    updates[`participants/${userId}`] = null;
+    updates[`whitePlayers/${userId}`] = null;
     update(gameRef, updates);
-    detachGame();
+
+    if (userId === userStore.user?.uid) {
+      detachGame();
+    }
   }
 
-  function startGame() {
+  // Transfer administrator privileges from current user to another user
+  function makeAdmin(userId: string) {
+    const gameRef = fRef(db, gameId.value!);
+
+    const updates: {[path: string]: any} = {};
+    updates['/admin'] = userId;
+    updates[`/participants/${userStore.user?.uid}`] = userStore.user?.email;
+    updates[`/participants/${userId}`] = null;
+    update(gameRef, updates);
+  }
+
+  function startGame(word: string) {
+    const gameRef = fRef(db, gameId.value!);
+
+    const updates: { [path: string]: any } = {};
+    updates['gameStarted'] = true;
+    updates['word'] = word;
+    update(gameRef, updates);
   }
 
   function endGame() {
@@ -95,6 +118,13 @@ export const useGameStore = defineStore('game', () => {
     updates['gameStarted'] = false;
     updates['word'] = '';
     update(gameRef, updates);
+  }
+
+  function toggleWhitePlayer(userId: string) {
+    const gameRef = fRef(db, gameId.value!);
+    runTransaction(child(gameRef, `whitePlayers/${userId}`), (currentData) => {
+      return currentData ? null : true;
+    });
   }
 
   function attachGame(id: string) {
@@ -168,6 +198,6 @@ export const useGameStore = defineStore('game', () => {
     gameList.value = [];
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, startGame, endGame, joinGame, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
 })
   
