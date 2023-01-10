@@ -28,9 +28,9 @@ const onMakeAdmin = (participantUid: string) => {
   <div class="container title mb-1">
     Lobby of game: {{ gameStore.gameId }}
   </div>
-  <form v-if="gameStore.amIAdmin" class="inline-form-group mb-2">
+  <form v-if="gameStore.amIAdmin" @submit.prevent="onStartGame" class="inline-form-group mb-2">
     <input placeholder="Hidden word" type="text" v-model="word" class="inline-form-control"/>
-    <button @click="onStartGame" class="btn btn-primary">Start Game</button>
+    <button type="submit" class="btn btn-primary">Start Game</button>
   </form>
   <div class="container">
     <h2 class="mb-1">
