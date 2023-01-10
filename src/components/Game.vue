@@ -1,21 +1,12 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/stores/game';
 import { useUserStore } from '@/stores/user';
-import { child, getDatabase, ref as fRef, set } from 'firebase/database';
 
 const gameStore = useGameStore();
 const userStore = useUserStore();
-const props = defineProps<{
-  id: string | string[];
-}>();
-
-
-const db = getDatabase();
-const gameRef = fRef(db, `${props.id}`);
 
 const onEndGame = () => {
-  set(child(gameRef, 'gameStarted'), false);
-  set(child(gameRef, 'word'), '');
+  gameStore.endGame();
 };
 </script>
 

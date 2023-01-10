@@ -85,6 +85,18 @@ export const useGameStore = defineStore('game', () => {
     detachGame();
   }
 
+  function startGame() {
+  }
+
+  function endGame() {
+    const gameRef = fRef(db, gameId.value!);
+
+    const updates: { [path: string]: any } = {};
+    updates['gameStarted'] = false;
+    updates['word'] = '';
+    update(gameRef, updates);
+  }
+
   function attachGame(id: string) {
     gameId.value = id;
     
@@ -156,6 +168,6 @@ export const useGameStore = defineStore('game', () => {
     gameList.value = [];
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, joinGame, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, gameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, startGame, endGame, joinGame, leaveGame }
 })
   

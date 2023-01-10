@@ -30,5 +30,5 @@ gameStore.$subscribe((_, state) => {
 <template>
   <button v-if="!gameStore.amIAdmin" @click="onLeaveGame" class="btn btn-danger mb-1">Leave game</button>
   <Lobby v-if="!gameStore.gameStarted" :id="route.params.id" />
-  <Game v-else :id="route.params.id" />
+  <Game v-else />
 </template>
