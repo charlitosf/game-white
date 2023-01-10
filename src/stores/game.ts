@@ -1,10 +1,11 @@
-import { getDatabase, child, onValue, onChildAdded, onChildRemoved, ref as fRef } from "firebase/database";
+import { getDatabase, child, onValue, onChildAdded, onChildRemoved, ref as fRef, update } from "firebase/database";
 import { defineStore } from "pinia"
 import { computed, ref, type Ref } from "vue"
 import { useUserStore } from "./user"
 
 export const useGameStore = defineStore('game', () => {
   const userStore = useUserStore();
+  const db = getDatabase();
 
   const offFuncs: { (): void; }[] = [];
 
@@ -18,12 +19,19 @@ export const useGameStore = defineStore('game', () => {
 
   const amIAdmin = computed(() => admin.value == userStore.user?.uid)
 
+  function leaveGame() {
+    const gameRef = fRef(db, gameId.value!);
+    const updates: {[path: string]: any} = {};
+    updates[`participants/${userStore.user?.uid}`] = null;
+    updates[`whitePlayers/${userStore.user?.uid}`] = null;
+    update(gameRef, updates);
+    stopGame();
+  }
 
   function startGame(id: string) {
     gameId.value = id;
-
-    const db = getDatabase();
-    const gameRef = fRef(db, id);
+    
+    const gameRef = fRef(db, gameId.value);
     const participantsRef = child(gameRef, 'participants');
     const whitesRef = child(gameRef, 'whitePlayers');
     const gameStartedRef = child(gameRef, `gameStarted`);
@@ -67,6 +75,6 @@ export const useGameStore = defineStore('game', () => {
     whitePlayers.value = {};
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, startGame, stopGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, startGame, stopGame, leaveGame }
 })
   
