@@ -14,7 +14,9 @@ const onEndGame = () => {
 </script>
 
 <template>
-  <button v-if="gameStore.amIAdmin" @click="onEndGame" class="btn btn-danger">End Game</button>
+  <div class="flex justify-end">
+    <button v-if="gameStore.amIAdmin" @click="onEndGame" class="btn btn-danger">End Game</button>
+  </div>
   <div class="container-fullscreen centered">
     <span v-if="amIWhite">White :)</span>
     <span v-else>{{ gameStore.word }}</span>
@@ -32,5 +34,9 @@ const onEndGame = () => {
   align-items: center;
   justify-content: center;
   margin: auto;
+}
+
+.justify-end {
+  justify-content: end;
 }
 </style>

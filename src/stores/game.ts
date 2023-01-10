@@ -50,10 +50,15 @@ export const useGameStore = defineStore('game', () => {
     return gameCode;
   }
 
-  function deleteGame(gameIndex: number) {
-    const gameCode = gameList.value[gameIndex];
+  function deleteGame(gameIndex: number | string) {
+    let gameCode: string;
+    if (typeof gameIndex === 'number') {
+      gameCode = gameList.value[gameIndex];
+    } else {
+      gameCode = gameIndex;
+    }
 
-    const gameRef = fRef(db, `${gameCode}`);
+    const gameRef = fRef(db, gameCode);
     set(gameRef, null);
   }
 
@@ -136,16 +141,18 @@ export const useGameStore = defineStore('game', () => {
     const whitesRef = child(gameRef, 'whitePlayers');
     const gameStartedRef = child(gameRef, `gameStarted`);
     const gameAdminRef = child(gameRef, `admin`);
-    
+    const gameWordRef = child(gameRef, `word`);
+
     offGameFuncs.push(onValue(gameStartedRef, (snapshot) => {
       gameStarted.value = snapshot.val();
     }));
     offGameFuncs.push(onValue(gameAdminRef, (snapshot) => {
       admin.value = snapshot.val();
     }));
-    offGameFuncs.push(onValue(child(gameRef, `word`), (snapshot) => {
+    offGameFuncs.push(onValue(gameWordRef, (snapshot) => {
       word.value = snapshot.val();
     }));
+
     offGameFuncs.push(onChildAdded(participantsRef, (snapshot) => {
       players.value[snapshot.key!] = snapshot.val();
     }));
@@ -155,6 +162,7 @@ export const useGameStore = defineStore('game', () => {
         detachGame();
       }
     }));
+    
     offGameFuncs.push(onChildAdded(whitesRef, (snapshot) => {
       whitePlayers.value[snapshot.key!] = true;
     }));

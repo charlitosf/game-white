@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/stores/game';
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const gameStore = useGameStore();
+const router = useRouter();
 
 const word = ref('');
 
@@ -22,9 +24,15 @@ const onMakeAdmin = (participantUid: string) => {
   gameStore.makeAdmin(participantUid);
 };
 
+const onDeleteGame = () => {
+  gameStore.deleteGame(gameStore.gameId!);
+
+  router.push({ name: 'home' });
+}
 </script>
 
 <template>
+  <button @click="onDeleteGame" class="btn btn-danger mb-1">Delete game</button>
   <div class="container title mb-1">
     Lobby of game: {{ gameStore.gameId }}
   </div>
