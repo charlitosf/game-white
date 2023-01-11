@@ -41,13 +41,15 @@ app.use(router)
 const fApp = initializeApp(firebaseConfig);
 // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
 // key is the counterpart to the secret key you set in the Firebase console.
-initializeAppCheck(fApp, {
-  provider: new ReCaptchaV3Provider(import.meta.env.VITE_FIREBASE_CAPTCHA_KEY),
+if (import.meta.env.VITE_ENVIRONMENT === 'PROD') {
+  initializeAppCheck(fApp, {
+    provider: new ReCaptchaV3Provider(import.meta.env.VITE_FIREBASE_CAPTCHA_KEY),
 
-  // Optional argument. If true, the SDK automatically refreshes App Check
-  // tokens as needed.
-  isTokenAutoRefreshEnabled: true
-});
+    // Optional argument. If true, the SDK automatically refreshes App Check
+    // tokens as needed.
+    isTokenAutoRefreshEnabled: true
+  });
+}
 const auth = getAuth(fApp);
 onAuthStateChanged(auth, (user) => {
   const userStore = useUserStore();
