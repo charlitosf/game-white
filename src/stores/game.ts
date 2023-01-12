@@ -24,23 +24,33 @@ export const useGameStore = defineStore('game', () => {
   const amIAdmin = computed(() => admin.value == userStore.user?.uid)
   const isEmptyGameList = computed(() => gameList.value.length == 0)
 
+  const generateRandomGameCode = async () => {
+    const gameHeadersRef = fRef(db, 'gameList');
+    const gameData = (await get(gameHeadersRef)).val();
+
+    let gameCode: string = generate4DigitRandomNumber();
+    if (gameData !== null) {
+      const existingGames = Object.keys(gameData);
+      while (existingGames.includes(gameCode)) {
+        gameCode = generate4DigitRandomNumber();
+      }
+    }
+    return gameCode;
+  }
+
   async function createGame() {
     const gameHeadersRef = fRef(db, 'gameList');
-    let gameCode: string = generate4DigitRandomNumber();
-    await runTransaction(gameHeadersRef, (currentData) => {
-      if (currentData === null) {
-        return {
-          [gameCode]: userStore.user?.uid,
-        };
-      } else {
-        const existingGames = Object.keys(currentData);
-        while (existingGames.includes(gameCode)) {
-          gameCode = generate4DigitRandomNumber();
-        }
-        currentData[gameCode] = userStore.user?.uid;
-        return currentData;
+    let retry = false;
+    let gameCode: string = '';
+    do {
+      gameCode = await generateRandomGameCode();
+      try {
+        await set(child(gameHeadersRef, gameCode), userStore.user?.uid);
+      } catch (error) {
+        retry = true;
       }
-    });
+    } while (retry);
+
     const gameObject = {
       public: {
         admin: userStore.user?.uid,
@@ -73,14 +83,14 @@ export const useGameStore = defineStore('game', () => {
     const gameRef = fRef(db, `gameData/${id}/public`);
 
     const isGameStarted = (await get(child(gameRef, 'gameStarted'))).val();
-    // Racing condition if game starts right here.
-    // Purpousefully ignored as it is not game-breaker if a player joins an already started game
+    // Racing condition if game starts right here or admin is changed.
+    // Purpousefully ignored as it is not game-breaker if a player joins an already started game and it should not change admin while the game is started
     // They will just never be white in the first round
-    if (isGameStarted === false) {
-      const admin = await get(child(gameRef, 'admin'));
-      if (admin.val() !== userStore.user?.uid) {
-        set(child(gameRef, `participants/${userStore.user?.uid}`), userStore.user?.email);
-      }
+    const admin = await get(child(gameRef, 'admin'));
+    if (admin.val() === userStore.user?.uid) {
+      return true;
+    } else if (isGameStarted === false) {
+      set(child(gameRef, `participants/${userStore.user?.uid}`), userStore.user?.email);
       return true;
     }
     return false;
@@ -89,9 +99,12 @@ export const useGameStore = defineStore('game', () => {
   function leaveGame(userId?: string) {
     userId = userId || userStore.user?.uid;
 
-    const gameRef = fRef(db, `gameData/${gameId.value!}/public`);
+    const gameRef = fRef(db, `gameData/${gameId.value!}`);
 
-    set(child(gameRef, `participants/${userId}`), null);
+    const updates: { [path: string]: any } = {};
+    updates[`public/participants/${userId}`] = null;
+    updates[`whitePlayers/${userId}`] = null;
+    update(gameRef, updates);
 
     if (userId === userStore.user?.uid) {
       detachGame();

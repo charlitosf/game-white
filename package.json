@@ -1,6 +1,6 @@
 {
   "name": "game-white",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
-    "deploy-only": "firebase deploy --only hosting",
+    "deploy-only": "firebase deploy",
     "deploy": "run-s build-only deploy-only"
   },
   "dependencies": {
