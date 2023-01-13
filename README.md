@@ -70,3 +70,7 @@ The `.firebaserc` and `.env` files should be modified according to the productio
 ```sh
 npm run deploy
 ```
+
+## License
+
+This project is licensed under the terms of the MIT license.
