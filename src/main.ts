@@ -15,6 +15,7 @@ import { faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { connectDatabaseEmulator, getDatabase } from 'firebase/database'
+import { connectAuthEmulator, getAuth } from '@firebase/auth';
 
 
 // Your web app's Firebase configuration
@@ -50,6 +51,9 @@ if (import.meta.env.DEV) {
   });
   const db = getDatabase(fApp);
   connectDatabaseEmulator(db, 'localhost', 9000);
+
+  const auth = getAuth(fApp);
+  connectAuthEmulator(auth, 'http://localhost:9099');
 }
 
 library.add(faEnvelope, faLinkedin, faGithub);

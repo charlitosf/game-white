@@ -15,5 +15,13 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "emulators": {
+    "auth": {
+      "enabled": true
+    },
+    "database": {
+      "enabled": true
+    }
   }
 }
