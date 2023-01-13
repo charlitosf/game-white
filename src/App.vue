@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getAuth } from '@firebase/auth';
 
 const userStore = useUserStore();
 
 const onLogout = () => {
-  const auth = getAuth();
-  auth.signOut();
-  userStore.user = null;
+  userStore.logout();
 }
 </script>
 
