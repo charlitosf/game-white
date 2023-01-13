@@ -10,7 +10,6 @@ export const useGameStore = defineStore('game', () => {
 
   const offGameFuncs: { (): void; }[] = [];
   const offWhitePlayersFuncs: { (): void; }[] = [];
-  const offGameListFuncs: { (): void; }[] = [];
 
   const gameId: Ref<string | null> = ref(null)
   const admin: Ref<string | null> = ref(null)
@@ -19,10 +18,7 @@ export const useGameStore = defineStore('game', () => {
   const players: Ref<{ [uid: string]: string }> = ref({})
   const whitePlayers: Ref<{ [uid: string]: boolean }> = ref({})
 
-  const gameList: Ref<string[]> = ref([])
-
   const amIAdmin = computed(() => admin.value == userStore.user?.uid)
-  const isEmptyGameList = computed(() => gameList.value.length == 0)
 
   const generateRandomGameCode = async () => {
     const gameHeadersRef = fRef(db, 'gameList');
@@ -62,21 +58,6 @@ export const useGameStore = defineStore('game', () => {
     const gameDataRef = fRef(db, `gameData/${gameCode}`);
     set(gameDataRef, gameObject);
     return gameCode;
-  }
-
-  function deleteGame(gameIndex: number | string) {
-    let gameCode: string;
-    if (typeof gameIndex === 'number') {
-      gameCode = gameList.value[gameIndex];
-    } else {
-      gameCode = gameIndex;
-    }
-
-    const rootRef = fRef(db);
-    const updates: { [path: string]: any } = {};
-    updates[`gameList/${gameCode}`] = null;
-    updates[`gameData/${gameCode}`] = null;
-    update(rootRef, updates);
   }
 
   async function joinGame(id: string) {
@@ -151,7 +132,7 @@ export const useGameStore = defineStore('game', () => {
 
   function attachGame(id: string) {
     gameId.value = id;
-    
+
     const gameRef = fRef(db, `gameData/${gameId.value}`);
     const participantsRef = child(gameRef, 'public/participants');
     const whitesRef = child(gameRef, 'whitePlayers');
@@ -165,7 +146,7 @@ export const useGameStore = defineStore('game', () => {
       whitePlayers.value = {};
       offWhitePlayersFuncs.forEach((offFunc) => offFunc());
       offWhitePlayersFuncs.length = 0;
-      
+
       if (admin.value === userStore.user?.uid) {
         offWhitePlayersFuncs.push(onChildAdded(whitesRef, (snapshot) => {
           whitePlayers.value[snapshot.key!] = true;
@@ -202,7 +183,7 @@ export const useGameStore = defineStore('game', () => {
     offGameFuncs.length = 0;
     offWhitePlayersFuncs.forEach((offFunc) => offFunc());
     offWhitePlayersFuncs.length = 0;
-    
+
     gameId.value = null;
     admin.value = null;
     gameStarted.value = false;
@@ -211,30 +192,5 @@ export const useGameStore = defineStore('game', () => {
     whitePlayers.value = {};
   }
 
-  function attachGameList() {
-    const gameHeadersRef = fRef(db, 'gameList');
-
-    offGameListFuncs.push(onChildAdded(gameHeadersRef, (snapshot) => {
-      if (snapshot.val() === userStore.user?.uid) {
-        gameList.value.push(snapshot.key!);
-      }
-    }));
-      
-    offGameListFuncs.push(onChildRemoved(gameHeadersRef, (snapshot) => {
-      const index = gameList.value.indexOf(snapshot.key!);
-      if (index > -1) {
-        gameList.value.splice(index, 1);
-      }
-    }));
-  }
-
-  function detachGameList() {
-    offGameListFuncs.forEach((offFunc) => offFunc());
-    offGameListFuncs.length = 0;
-
-    gameList.value = [];
-  }
-
-  return { gameId, admin, gameStarted, word, players, whitePlayers, gameList, amIAdmin, isEmptyGameList, attachGame, detachGame, attachGameList, detachGameList, createGame, deleteGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, attachGame, detachGame, createGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
 })
-  

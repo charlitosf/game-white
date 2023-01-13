@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { ref } from 'vue';
 import { useGameStore } from '@/stores/game';
+import { useGameListStore } from '@/stores/gameList';
 
 const router = useRouter();
 const gameStore = useGameStore();
-
-onMounted(() => {
-  gameStore.attachGameList();
-});
+const gameListStore = useGameListStore();
 
 const gameId = ref('');
 
@@ -27,12 +25,8 @@ const onJoinGame = async () => {
 };
 
 const onDeleteGame = (gameIndex: number) => {
-  gameStore.deleteGame(gameIndex);
+  gameListStore.deleteGame(gameIndex);
 };
-
-onBeforeUnmount(() => {
-  gameStore.detachGameList();
-});
 </script>
 
 <template>
@@ -47,9 +41,9 @@ onBeforeUnmount(() => {
     </form>
   </div>
   <div class="container">
-    <h2 v-if="!gameStore.isEmptyGameList">My currently started games:</h2>
+    <h2 v-if="!gameListStore.isEmptyGameList">My currently started games:</h2>
     <h2 v-else>You have not started any games yet!</h2>
-    <div class="flex vertical-baselined background-container" v-for="game, index in gameStore.gameList" :key="index">
+    <div class="flex vertical-baselined background-container" v-for="game, index in gameListStore.gameList" :key="index">
       <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
       <button @click="onDeleteGame(index)" class="btn btn-danger">Delete</button>
     </div>

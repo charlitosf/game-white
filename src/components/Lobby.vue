@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/stores/game';
+import { useGameListStore } from '@/stores/gameList';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const gameStore = useGameStore();
+const gameListStore = useGameListStore();
 const router = useRouter();
 
 const word = ref('');
@@ -25,7 +27,7 @@ const onMakeAdmin = (participantUid: string) => {
 };
 
 const onDeleteGame = () => {
-  gameStore.deleteGame(gameStore.gameId!);
+  gameListStore.deleteGame(gameStore.gameId!);
 
   router.push({ name: 'home' });
 }
@@ -42,9 +44,9 @@ const onDeleteGame = () => {
   </form>
   <div class="container">
     <h2 class="mb-1">
-      Participants - 
-      <span v-if="gameStore.amIAdmin">select whites</span>
-      <span v-else>wait for the game to start</span>
+      Participants -
+      <span v-if="gameStore.amIAdmin"> select whites</span>
+      <span v-else> wait for the game to start</span>
     </h2>
     <div :class="{'align-end': gameStore.amIAdmin}" class="flex spread vertical-centered background-container" v-for="email, uid in gameStore.players" :key="uid">
       <label v-if="gameStore.amIAdmin" class="switch">
@@ -73,7 +75,7 @@ const onDeleteGame = () => {
   height: 34px;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
