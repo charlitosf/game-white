@@ -1,7 +1,7 @@
 import { generate4DigitRandomNumber } from "@/utils/utils";
-import { getDatabase, child, onValue, onChildAdded, onChildRemoved, ref as fRef, update, runTransaction, set, get } from "firebase/database";
+import { getDatabase, child, onValue, onChildAdded, onChildRemoved, ref as fRef, update, runTransaction, set, get, type DatabaseReference } from "firebase/database";
 import { defineStore } from "pinia"
-import { computed, ref, type Ref } from "vue"
+import { computed, ref, watch, type Ref } from "vue"
 import { useUserStore } from "./user"
 
 export const useGameStore = defineStore('game', () => {
@@ -17,6 +17,18 @@ export const useGameStore = defineStore('game', () => {
   const word: Ref<string | null> = ref(null)
   const players: Ref<{ [uid: string]: string }> = ref({})
   const whitePlayers: Ref<{ [uid: string]: boolean }> = ref({})
+
+  let gameDataRefPromiseResolve: (val: DatabaseReference | PromiseLike<DatabaseReference>) => void;
+  let gameDataRef: DatabaseReference | Promise<DatabaseReference> = new Promise((r) => { gameDataRefPromiseResolve = r; });
+  watch(gameId, (newGameId) => {
+    if (newGameId === null) {
+      gameDataRef = new Promise((r) => { gameDataRefPromiseResolve = r; });
+      detachGame();
+    } else {
+      gameDataRefPromiseResolve(fRef(db, `gameData/${newGameId}`));
+      attachGame();
+    }
+  });
 
   const amIAdmin = computed(() => admin.value == userStore.user?.uid)
 
@@ -36,12 +48,13 @@ export const useGameStore = defineStore('game', () => {
 
   async function createGame() {
     const gameHeadersRef = fRef(db, 'gameList');
-    let retry = false;
     let gameCode: string = '';
+    let retry = false;
     do {
       gameCode = await generateRandomGameCode();
       try {
         await set(child(gameHeadersRef, gameCode), userStore.user?.uid);
+        retry = false;
       } catch (error) {
         retry = true;
       }
@@ -55,39 +68,41 @@ export const useGameStore = defineStore('game', () => {
       word: '',
       // whitePlayers: { uid: true, }
     };
-    const gameDataRef = fRef(db, `gameData/${gameCode}`);
-    set(gameDataRef, gameObject);
+
+    gameId.value = gameCode;
+
+    set(await gameDataRef, gameObject);
     return gameCode;
   }
 
   async function joinGame(id: string) {
     const gameRef = fRef(db, `gameData/${id}/public`);
 
-    const isGameStarted = (await get(child(gameRef, 'gameStarted'))).val();
+    const admin = await get(child(gameRef, 'admin'));
     // Racing condition if game starts right here or admin is changed.
     // Purpousefully ignored as it is not game-breaker if a player joins an already started game and it should not change admin while the game is started
     // They will just never be white in the first round
-    const admin = await get(child(gameRef, 'admin'));
     if (admin.val() === userStore.user?.uid) {
+      gameId.value = id;
       return true;
-    } else if (isGameStarted === false) {
+    } else if ((await get(child(gameRef, 'gameStarted'))).val() === false) {
       set(child(gameRef, `participants/${userStore.user?.uid}`), userStore.user?.email);
+      gameId.value = id;
       return true;
     }
     return false;
   }
 
-  function leaveGame(userId?: string) {
+  async function leaveGame(userId?: string) {
     userId = userId || userStore.user?.uid;
-
-    const gameRef = fRef(db, `gameData/${gameId.value!}`);
 
     const updates: { [path: string]: any } = {};
     updates[`public/participants/${userId}`] = null;
     updates[`whitePlayers/${userId}`] = null;
-    update(gameRef, updates);
+    update(await gameDataRef, updates);
 
     if (userId === userStore.user?.uid) {
+      gameId.value = null;
       detachGame();
     }
   }
@@ -105,40 +120,33 @@ export const useGameStore = defineStore('game', () => {
     update(rootRef, updates);
   }
 
-  function startGame(word: string) {
-    const gameRef = fRef(db, `gameData/${gameId.value!}`);
-
+  async function startGame(word: string) {
     const updates: { [path: string]: any } = {};
     updates['public/gameStarted'] = true;
     updates['word'] = word;
-    update(gameRef, updates);
+    update(await gameDataRef, updates);
   }
 
-  function endGame() {
-    const gameRef = fRef(db, `gameData/${gameId.value!}`);
-
+  async function endGame() {
     const updates: { [path: string]: any } = {};
     updates['public/gameStarted'] = false;
     updates['word'] = '';
-    update(gameRef, updates);
+    update(await gameDataRef, updates);
   }
 
-  function toggleWhitePlayer(userId: string) {
-    const whitePlayersRef = fRef(db, `gameData/${gameId.value!}/whitePlayers`);
+  async function toggleWhitePlayer(userId: string) {
+    const whitePlayersRef = child(await gameDataRef, 'whitePlayers');
     runTransaction(child(whitePlayersRef, userId), (currentData) => {
       return currentData ? null : true;
     });
   }
 
-  function attachGame(id: string) {
-    gameId.value = id;
-
-    const gameRef = fRef(db, `gameData/${gameId.value}`);
-    const participantsRef = child(gameRef, 'public/participants');
-    const whitesRef = child(gameRef, 'whitePlayers');
-    const gameStartedRef = child(gameRef, `public/gameStarted`);
-    const gameAdminRef = child(gameRef, `public/admin`);
-    const gameWordRef = child(gameRef, `word`);
+  async function attachGame() {
+    const participantsRef = child(await gameDataRef, 'public/participants');
+    const whitesRef = child(await gameDataRef, 'whitePlayers');
+    const gameStartedRef = child(await gameDataRef, `public/gameStarted`);
+    const gameAdminRef = child(await gameDataRef, `public/admin`);
+    const gameWordRef = child(await gameDataRef, `word`);
 
     offGameFuncs.push(onValue(gameAdminRef, (snapshot) => {
       admin.value = snapshot.val();
@@ -184,7 +192,6 @@ export const useGameStore = defineStore('game', () => {
     offWhitePlayersFuncs.forEach((offFunc) => offFunc());
     offWhitePlayersFuncs.length = 0;
 
-    gameId.value = null;
     admin.value = null;
     gameStarted.value = false;
     word.value = null;
@@ -192,5 +199,5 @@ export const useGameStore = defineStore('game', () => {
     whitePlayers.value = {};
   }
 
-  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, attachGame, detachGame, createGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
+  return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, createGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
 })
