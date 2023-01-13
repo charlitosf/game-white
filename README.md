@@ -1,6 +1,6 @@
 # Game-White
 
-This is a VueJS 3 + Firebase project about a game called "White".
+This is a VueJS 3 + Firebase project about a game called "White". An explanation of the rules can be found in the about page of this project.
 
 ## Libraries used
 
