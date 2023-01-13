@@ -71,7 +71,11 @@ const doLogin = async () => {
       // Login using firebase auth
       const result = await userStore.signIn(emailLogin.value, passwordLogin.value);
       if (result !== null) {
-        alert(`${result.code}: ${result.message}`)
+        if (result.code === 'auth/user-not-found' || result.code === 'auth/wrong-password') {
+          alert('auth/wrong-credentials: Wrong email or password');
+        } else {
+          alert(`${result.code}: ${result.message}`)
+        }
       }
    }
 }
