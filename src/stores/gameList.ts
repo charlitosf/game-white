@@ -7,11 +7,11 @@ export const useGameListStore = defineStore('gameList', () => {
   const db = getDatabase();
   const userStore = useUserStore();
   const gameHeadersRef = fRef(db, 'gameList');
-  
+
   const gameList: Ref<string[]> = ref([]);
-  
+
   const isEmptyGameList = computed(() => gameList.value.length == 0);
-  
+
   // #region Firebase Listeners
   onChildAdded(gameHeadersRef, (snapshot) => {
     if (snapshot.val() === userStore.user?.uid) {
@@ -25,7 +25,7 @@ export const useGameListStore = defineStore('gameList', () => {
     }
   });
   // #endregion
-  
+
   function deleteGame(gameIndex: number | string) {
     let gameCode: string;
     if (typeof gameIndex === 'number') {
@@ -33,13 +33,13 @@ export const useGameListStore = defineStore('gameList', () => {
     } else {
       gameCode = gameIndex;
     }
-    
+
     const rootRef = fRef(db);
     const updates: { [path: string]: any } = {};
     updates[`gameList/${gameCode}`] = null;
     updates[`gameData/${gameCode}`] = null;
     update(rootRef, updates);
   }
-  
+
   return { gameList, isEmptyGameList, deleteGame };
 });
