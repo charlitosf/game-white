@@ -63,9 +63,24 @@ Files will be exported to the `dist/` folder.
 
 ### Deploy to Firebase
 
-Build and deploy to the Firebase hosting and database rules:
+Build and deploy to the Firebase hosting and database rules.
 
-The `.firebaserc` and `.env` files should be modified according to the production environment. Then run:
+Copy the `.env.local.copy` file into `.env.local` and fill it with the appropriate keys. Then the `.firebaserc` file should be modified according to the production environment and the Firebase configuration of the `main.ts` file should be updated.
+
+```javascript
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: "<your-domain>",
+  databaseURL: "<your-database-url>",
+  projectId: "<your-project-id>",
+  storageBucket: "<your-storage-bucket>",
+  messagingSenderId: "<your-messaging-sender-id>",
+  appId: "<your-app-id>",
+  measurementId: "<your-measurement-id>"
+};
+```
+
+ Then run:
 
 ```sh
 npm run deploy
