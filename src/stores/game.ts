@@ -10,7 +10,6 @@ export const useGameStore = defineStore('game', () => {
   
   const offGameFuncs: { (): void; }[] = [];
   const offWhitePlayersFuncs: { (): void; }[] = [];
-  const offGameListFuncs: { (): void; }[] = [];
   
   const gameId: Ref<string | null> = ref(null)
   const admin: Ref<string | null> = ref(null)
