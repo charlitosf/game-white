@@ -31,7 +31,9 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { useUserStore } from '@/stores/user';
+
+const userStore = useUserStore();
 
 const emailReg = ref('');
 const passwordReg = ref('');
@@ -43,7 +45,7 @@ const passwordLogin = ref('');
 const registerActive = ref(false);
 const emptyFields = ref(false);
 
-const doRegister = () => {
+const doRegister = async () => {
    if (emailReg.value == '' || passwordReg.value == '' || confirmReg.value == '') {
       emptyFields.value = true;
    } else {
@@ -53,29 +55,24 @@ const doRegister = () => {
          return;
       }
       // Register using firebase auth
-      const auth = getAuth();
-      createUserWithEmailAndPassword(auth, emailReg.value, passwordReg.value)
-         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            alert(`${errorCode}: ${errorMessage}}`)
-         });
+      const result = await userStore.signUp(emailReg.value, passwordReg.value);
+      if (result !== null) {
+        alert(`${result.code}: ${result.message}`)
+      }
+
    }
 }
 
-const doLogin = () => {
+const doLogin = async () => {
    if (emailLogin.value == '' || passwordLogin.value == '') {
       emptyFields.value = true;
    } else {
       emptyFields.value = false;
       // Login using firebase auth
-      const auth = getAuth();
-      signInWithEmailAndPassword(auth, emailLogin.value, passwordLogin.value)
-         .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            alert(`${errorCode}: ${errorMessage}}`)
-         });
+      const result = await userStore.signIn(emailLogin.value, passwordLogin.value);
+      if (result !== null) {
+        alert(`${result.code}: ${result.message}`)
+      }
    }
 }
 </script>
