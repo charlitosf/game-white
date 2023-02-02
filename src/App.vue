@@ -64,6 +64,17 @@ div a.router-link-exact-active:hover {
   color: #fff;
 }
 
+.btn-secondary {
+  background-color: var(--color-secondary);
+  border: 1px solid var(--color-secondary-dark);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-secondary-dark);
+  border: 1px solid var(--color-secondary);
+  color: #fff;
+}
+
 .btn-danger {
   background-color: var(--color-danger);
   border: 1px solid var(--color-danger-dark);

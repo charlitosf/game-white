@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/stores/game';
 import { useGameListStore } from '@/stores/gameList';
+import { computed } from '@vue/reactivity';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -9,6 +10,8 @@ const gameListStore = useGameListStore();
 const router = useRouter();
 
 const word = ref('');
+
+const moreThanOnePlayer = computed(() => Object.keys(gameStore.players).length > 1);
 
 const onStartGame = () => {
   gameStore.startGame(word.value);
@@ -24,6 +27,10 @@ const onKick = (participantUid: string) => {
 
 const onMakeAdmin = (participantUid: string) => {
   gameStore.makeAdmin(participantUid);
+};
+
+const onMakeAdminRandomly = () => {
+  gameStore.makeAdmin();
 };
 
 const onDeleteGame = () => {
@@ -45,9 +52,16 @@ const onDeleteGame = () => {
   </form>
   <div class="container">
     <h2 class="mb-1">
-      Participants -
-      <span v-if="gameStore.amIAdmin"> select whites</span>
-      <span v-else> wait for the game to start</span>
+      <div class="flex spread">
+        <div>
+          Participants -
+          <span v-if="gameStore.amIAdmin"> select whites</span>
+          <span v-else> wait for the game to start</span>
+        </div>
+        <div>
+          <button v-if="gameStore.amIAdmin && moreThanOnePlayer" @click="onMakeAdminRandomly" class="btn btn-secondary">Make admin randomly</button>
+        </div>
+      </div>
     </h2>
     <div :class="{'align-end': gameStore.amIAdmin}" class="flex spread vertical-centered background-container" v-for="email, uid in gameStore.players" :key="uid">
       <label v-if="gameStore.amIAdmin" class="switch">
