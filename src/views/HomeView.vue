@@ -11,14 +11,14 @@ const gameListStore = useGameListStore();
 const gameId = ref('');
 
 const onStartGame = async () => {
-  const gameCode = await gameStore.createGame();
-  router.push(`/games/${gameCode}`);
+  await gameStore.createGame();
+  router.push({ name: 'lobby'});
 };
 
 const onJoinGame = async () => {
   const successful = await gameStore.joinGame(gameId.value);
   if (successful) {
-    router.push(`/games/${gameId.value}`);
+    router.push({ name: 'lobby'});
   } else {
     alert('Game does not exist or has already started!');
   }
