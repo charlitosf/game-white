@@ -185,6 +185,8 @@ export const useGameStore = defineStore('game', () => {
       gameStarted.value = snapshot.val();
       if (gameStarted.value) {
         retrieveWord();
+      } else {
+        word.value = '';
       }
     }));
     offGameFuncs.push(onChildAdded(participantsRef, (snapshot) => {
