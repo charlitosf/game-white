@@ -22,6 +22,9 @@
     },
     "database": {
       "enabled": true
+    },
+    "hosting": {
+      "enabled": false
     }
   }
 }

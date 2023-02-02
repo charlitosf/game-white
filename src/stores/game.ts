@@ -146,7 +146,6 @@ export const useGameStore = defineStore('game', () => {
     const whitesRef = child(await gameDataRef, 'whitePlayers');
     const gameStartedRef = child(await gameDataRef, `public/gameStarted`);
     const gameAdminRef = child(await gameDataRef, `public/admin`);
-    const gameWordRef = child(await gameDataRef, `word`);
 
     offGameFuncs.push(onValue(gameAdminRef, (snapshot) => {
       admin.value = snapshot.val();
@@ -171,9 +170,9 @@ export const useGameStore = defineStore('game', () => {
 
     offGameFuncs.push(onValue(gameStartedRef, (snapshot) => {
       gameStarted.value = snapshot.val();
-    }));
-    offGameFuncs.push(onValue(gameWordRef, (snapshot) => {
-      word.value = snapshot.val();
+      if (gameStarted.value) {
+        retrieveWord();
+      }
     }));
     offGameFuncs.push(onChildAdded(participantsRef, (snapshot) => {
       players.value[snapshot.key!] = snapshot.val();
@@ -194,9 +193,12 @@ export const useGameStore = defineStore('game', () => {
 
     admin.value = null;
     gameStarted.value = false;
-    word.value = null;
     players.value = {};
     whitePlayers.value = {};
+  }
+
+  async function retrieveWord() {
+    word.value = (await get(child(await gameDataRef, 'word'))).val();
   }
 
   return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, createGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
