@@ -100,9 +100,10 @@ export const useGameStore = defineStore('game', () => {
     userId = userId || userStore.user?.uid;
 
     const updates: { [path: string]: any } = {};
-    updates[`public/participants/${userId}`] = null;
-    updates[`whitePlayers/${userId}`] = null;
-    update(await gameDataRef, updates);
+    updates[`gameData/${gameId.value}/public/participants/${userId}`] = null;
+    updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
+    updates[`userGame/${userId}`] = null;
+    update(fRef(db), updates);
 
     if (userId === userStore.user?.uid) {
       gameId.value = null;
