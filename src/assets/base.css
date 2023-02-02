@@ -36,6 +36,10 @@
   --color-primary: rgb(10, 96, 50);
   --color-primary-dark: rgb(6, 52, 28);
 
+  /* Secondary color, blue */
+  --color-secondary: rgb(0, 123, 255);
+  --color-secondary-dark: rgb(0, 82, 204);
+
   --color-danger: rgb(187, 19, 19);
   --color-danger-dark: rgb(103, 15, 15);
 
