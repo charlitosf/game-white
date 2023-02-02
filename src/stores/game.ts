@@ -198,7 +198,11 @@ export const useGameStore = defineStore('game', () => {
   }
 
   async function retrieveWord() {
-    word.value = (await get(child(await gameDataRef, 'word'))).val();
+    try {
+      word.value = (await get(child(await gameDataRef, 'word'))).val();
+    } catch (e) {
+      word.value = 'White :)';
+    }
   }
 
   return { gameId, admin, gameStarted, word, players, whitePlayers, amIAdmin, createGame, startGame, endGame, makeAdmin, toggleWhitePlayer, joinGame, leaveGame }
