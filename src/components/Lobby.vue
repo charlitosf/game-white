@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useGameStore } from '@/stores/game';
 import { useGameListStore } from '@/stores/gameList';
+import { computed } from '@vue/reactivity';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -9,6 +10,8 @@ const gameListStore = useGameListStore();
 const router = useRouter();
 
 const word = ref('');
+
+const moreThanOnePlayer = computed(() => Object.keys(gameStore.players).length > 1);
 
 const onStartGame = () => {
   gameStore.startGame(word.value);
@@ -56,7 +59,7 @@ const onDeleteGame = () => {
           <span v-else> wait for the game to start</span>
         </div>
         <div>
-          <button v-if="gameStore.amIAdmin" @click="onMakeAdminRandomly" class="btn btn-secondary">Make admin randomly</button>
+          <button v-if="gameStore.amIAdmin && moreThanOnePlayer" @click="onMakeAdminRandomly" class="btn btn-secondary">Make admin randomly</button>
         </div>
       </div>
     </h2>
