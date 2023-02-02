@@ -35,7 +35,7 @@
     "userGame": {
       ".read": "auth !== null",
       "$userId": {
-        ".write": "auth !== null && $userId === auth.uid"
+        ".write": "auth !== null && (auth.uid === $userId || root.child('gameData').child(data.val()).child('public').child('admin').val() === auth.uid)"
       }
     }
   }
