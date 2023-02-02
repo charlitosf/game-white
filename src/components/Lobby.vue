@@ -27,7 +27,7 @@ const onMakeAdmin = (participantUid: string) => {
 };
 
 const onDeleteGame = () => {
-  gameListStore.deleteAdminGame(gameStore.gameId!);
+  gameListStore.deleteAdminGame();
   gameStore.gameId = null;
 
   router.push({ name: 'home' });
