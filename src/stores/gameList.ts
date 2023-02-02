@@ -1,4 +1,4 @@
-import { equalTo, get, getDatabase, onChildAdded, onChildRemoved, onValue, orderByValue, query, ref as fRef, update } from "firebase/database";
+import { child, equalTo, get, getDatabase, onChildAdded, onChildRemoved, onValue, orderByValue, query, ref as fRef, update } from "firebase/database";
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
 import { useUserStore } from "./user";
@@ -30,7 +30,7 @@ export const useGameListStore = defineStore('gameList', () => {
   async function deleteAdminGame() {
     const rootRef = fRef(db);
     const updates: { [path: string]: any } = {};
-    const players = (await get(fRef(db, `gameData/${adminGame.value}/public/participants`))).val();
+    const players = (await get(child(rootRef, `gameData/${adminGame.value}/public/participants`))).val();
     for (const player of Object.keys(players)) {
       updates[`userGame/${player}`] = null;
     }
