@@ -20,7 +20,7 @@
           }
         },
         "word": {
-          ".read": "auth !== null && root.child('gameData').child($gameDataId).child('public').child('participants').child(auth.uid).exists()"
+          ".read": "auth !== null && root.child('gameData').child($gameDataId).child('public').child('participants').child(auth.uid).exists() && !root.child('gameData').child($gameDataId).child('whitePlayers').child(auth.uid).exists()"
         },
         "whitePlayers": {
           "$userId": {
