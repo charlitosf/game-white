@@ -13,9 +13,9 @@ export const useUserStore = defineStore('user', () => {
   onAuthStateChanged(auth, (newUser) => {
     user.value = newUser;
     if (newUser) {
-      router.push('/')
+      router.push({ name: 'home' })
     } else {
-      router.push('/login')
+      router.push({ name: 'login' })
     }
   });
 
