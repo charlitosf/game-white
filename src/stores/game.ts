@@ -48,7 +48,7 @@ export const useGameStore = defineStore('game', () => {
 
   async function createGame() {
     const gameHeadersRef = fRef(db, 'gameList');
-    let gameCode: string = '';
+    let gameCode: string;
     let retry = false;
     do {
       gameCode = await generateRandomGameCode();
@@ -151,6 +151,7 @@ export const useGameStore = defineStore('game', () => {
     const gameAdminRef = child(await gameDataRef, `public/admin`);
 
     offGameFuncs.push(onValue(gameAdminRef, (snapshot) => {
+      const prevAdmin = admin.value;
       admin.value = snapshot.val();
 
       whitePlayers.value = {};
@@ -164,6 +165,8 @@ export const useGameStore = defineStore('game', () => {
         offWhitePlayersFuncs.push(onChildRemoved(whitesRef, (snapshot) => {
           delete whitePlayers.value[snapshot.key!];
         }));
+      } else if (admin.value === null && prevAdmin === userStore.user?.uid) {
+        detachGame();
       } else {
         offWhitePlayersFuncs.push(onValue(child(whitesRef, userStore.user?.uid!), (snapshot) => {
           whitePlayers.value[snapshot.key!] = snapshot.val() || null;
@@ -198,6 +201,7 @@ export const useGameStore = defineStore('game', () => {
     gameStarted.value = false;
     players.value = {};
     whitePlayers.value = {};
+    gameId.value = null;
   }
 
   async function retrieveWord() {

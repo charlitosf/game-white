@@ -31,8 +31,10 @@ export const useGameListStore = defineStore('gameList', () => {
     const rootRef = fRef(db);
     const updates: { [path: string]: any } = {};
     const players = (await get(child(rootRef, `gameData/${adminGame.value}/public/participants`))).val();
-    for (const player of Object.keys(players)) {
-      updates[`userGame/${player}`] = null;
+    if (players !== null) {
+      for (const player of Object.keys(players)) {
+        updates[`userGame/${player}`] = null;
+      }
     }
     updates[`gameList/${adminGame.value}`] = null;
     updates[`gameData/${adminGame.value}`] = null;
