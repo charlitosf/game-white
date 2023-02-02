@@ -30,6 +30,12 @@
           }
         }
       }
+    },
+    "userGame": {
+      ".read": "auth !== null",
+      "$userId": {
+        ".write": "auth !== null && $userId === auth.uid"
+      }
     }
   }
 }

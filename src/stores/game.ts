@@ -86,7 +86,10 @@ export const useGameStore = defineStore('game', () => {
       gameId.value = id;
       return true;
     } else if ((await get(child(gameRef, 'gameStarted'))).val() === false) {
-      set(child(gameRef, `participants/${userStore.user?.uid}`), userStore.user?.email);
+      const updateData: { [path: string]: any } = {};
+      updateData[`gameData/${id}/public/participants/${userStore.user?.uid}`] = userStore.user?.email;
+      updateData[`userGame/${userStore.user?.uid}`] = id;
+      update(fRef(db), updateData);
       gameId.value = id;
       return true;
     }
