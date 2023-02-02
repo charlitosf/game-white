@@ -32,7 +32,7 @@ const onDeleteGame = () => {
 <template>
   <div class="container flex spread vertical-centered mb-1 title">
     Welcome to the game "White"!
-    <button @click="onStartGame" class="btn btn-primary ml-1">Start new game</button>
+    <button v-if="gameListStore.isEmptyGameList" @click="onStartGame" class="btn btn-primary ml-1">Start new game</button>
   </div>
   <div class="container mb-1">
     <form @submit.prevent="onJoinGame" class="inline-form-group">
