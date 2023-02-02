@@ -41,7 +41,7 @@ const onDeleteGame = () => {
     </form>
   </div>
   <div class="container">
-    <h2 v-if="!gameListStore.isEmptyGameList">My games:</h2>
+    <h2 class="mb-1" v-if="!gameListStore.isEmptyGameList">My games:</h2>
     <h2 v-else>You do not belong to any games yet!</h2>
     <div class="flex vertical-baselined background-container" v-if="gameListStore.adminGame !== null">
       <span @click="gameId = gameListStore.adminGame!; onJoinGame()" class="main-element">{{ gameListStore.adminGame }}</span>
