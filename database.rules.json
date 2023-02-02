@@ -2,6 +2,7 @@
   "rules": {
     "gameList": {
       ".read": "auth !== null",
+      ".indexOn": ".value",
       "$gameListId": {
         ".write": "auth !== null && (data.val() === auth.uid || !data.exists())"
       }
@@ -29,6 +30,12 @@
             ".validate": "root.child('gameData').child($gameDataId).child('public').child('admin').val() === auth.uid || (newData.val() === null && newData.parent().child('public').child('participants').child(auth.uid).val() === null)"
           }
         }
+      }
+    },
+    "userGame": {
+      ".read": "auth !== null",
+      "$userId": {
+        ".write": "auth !== null && (auth.uid === $userId || root.child('gameData').child(data.val()).child('public').child('admin').val() === auth.uid)"
       }
     }
   }

@@ -24,28 +24,31 @@ const onJoinGame = async () => {
   }
 };
 
-const onDeleteGame = (gameIndex: string) => {
-  gameListStore.deleteGame(gameIndex);
+const onDeleteGame = () => {
+  gameListStore.deleteAdminGame();
 };
 </script>
 
 <template>
   <div class="container flex spread vertical-centered mb-1 title">
     Welcome to the game "White"!
-    <button @click="onStartGame" class="btn btn-primary ml-1">Start new game</button>
+    <button v-if="gameListStore.isEmptyGameList" @click="onStartGame" class="btn btn-primary ml-1">Start new game</button>
   </div>
-  <div class="container mb-1">
+  <div v-if="!gameListStore.alreadyBelongsToAGame" class="container mb-1">
     <form @submit.prevent="onJoinGame" class="inline-form-group">
       <input type="text" v-model="gameId" class="inline-form-control" placeholder="Game code" />
       <button type="submit" class="btn btn-primary">Join game</button>
     </form>
   </div>
   <div class="container">
-    <h2 v-if="!gameListStore.isEmptyGameList">My currently started games:</h2>
-    <h2 v-else>You have not started any games yet!</h2>
-    <div class="flex vertical-baselined background-container" v-for="game, index in gameListStore.gameList" :key="index">
-      <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
-      <button @click="onDeleteGame(game)" class="btn btn-danger">Delete</button>
+    <h2 class="mb-1" v-if="!gameListStore.isEmptyGameList">My games:</h2>
+    <h2 v-else>You do not belong to any games yet!</h2>
+    <div class="flex vertical-baselined background-container" v-if="gameListStore.adminGame !== null">
+      <span @click="gameId = gameListStore.adminGame!; onJoinGame()" class="main-element">{{ gameListStore.adminGame }}</span>
+      <button @click="onDeleteGame()" class="btn btn-danger">Delete</button>
+    </div>
+    <div class="flex vertical-baselined background-container" v-if="gameListStore.guestGame !== null">
+      <span @click="gameId = gameListStore.guestGame!; onJoinGame()" class="main-element">{{ gameListStore.guestGame }}</span>
     </div>
   </div>
 </template>
