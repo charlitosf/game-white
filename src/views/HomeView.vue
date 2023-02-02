@@ -34,7 +34,7 @@ const onDeleteGame = () => {
     Welcome to the game "White"!
     <button v-if="gameListStore.isEmptyGameList" @click="onStartGame" class="btn btn-primary ml-1">Start new game</button>
   </div>
-  <div class="container mb-1">
+  <div v-if="!gameListStore.alreadyBelongsToAGame" class="container mb-1">
     <form @submit.prevent="onJoinGame" class="inline-form-group">
       <input type="text" v-model="gameId" class="inline-form-control" placeholder="Game code" />
       <button type="submit" class="btn btn-primary">Join game</button>

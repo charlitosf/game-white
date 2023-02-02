@@ -13,6 +13,8 @@ export const useGameListStore = defineStore('gameList', () => {
   const adminGame: Ref<string | null> = ref(null);
 
   const isEmptyGameList = computed(() => guestGame.value === null && adminGame.value === null);
+  const alreadyBelongsToAGame = computed(() => guestGame.value !== null || adminGame.value !== null);
+
   const q = query(gameHeadersRef, orderByValue(), equalTo(userStore.user?.uid!));
 
   // #region Firebase Listeners
@@ -41,5 +43,5 @@ export const useGameListStore = defineStore('gameList', () => {
     update(rootRef, updates);
   }
 
-  return { guestGame, adminGame, isEmptyGameList, deleteAdminGame };
+  return { guestGame, adminGame, isEmptyGameList, alreadyBelongsToAGame, deleteAdminGame };
 });
