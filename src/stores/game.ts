@@ -121,6 +121,8 @@ export const useGameStore = defineStore('game', () => {
     updates[`gameData/${gameId.value}/public/participants/${userStore.user?.uid}`] = userStore.user?.email;
     updates[`gameData/${gameId.value}/public/participants/${userId}`] = null;
     updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
+    updates[`userGame/${userStore.user?.uid}`] = gameId.value;
+    updates[`userGame/${userId}`] = null;
     update(rootRef, updates);
   }
 
