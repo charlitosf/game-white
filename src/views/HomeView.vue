@@ -24,8 +24,8 @@ const onJoinGame = async () => {
   }
 };
 
-const onDeleteGame = (gameIndex: string) => {
-  gameListStore.deleteGame(gameIndex);
+const onDeleteGame = () => {
+  gameListStore.deleteAdminGame();
 };
 </script>
 
@@ -43,9 +43,12 @@ const onDeleteGame = (gameIndex: string) => {
   <div class="container">
     <h2 v-if="!gameListStore.isEmptyGameList">My currently started games:</h2>
     <h2 v-else>You have not started any games yet!</h2>
-    <div class="flex vertical-baselined background-container" v-for="game, index in gameListStore.gameList" :key="index">
-      <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
-      <button @click="onDeleteGame(game)" class="btn btn-danger">Delete</button>
+    <div class="flex vertical-baselined background-container" v-if="gameListStore.adminGame !== null">
+      <span @click="gameId = gameListStore.adminGame!; onJoinGame()" class="main-element">{{ gameListStore.adminGame }}</span>
+      <button @click="onDeleteGame()" class="btn btn-danger">Delete</button>
+    </div>
+    <div class="flex vertical-baselined background-container" v-if="gameListStore.guestGame !== null">
+      <span @click="gameId = gameListStore.guestGame!; onJoinGame()" class="main-element">{{ gameListStore.guestGame }}</span>
     </div>
   </div>
 </template>
