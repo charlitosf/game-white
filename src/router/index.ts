@@ -27,7 +27,7 @@ const router = createRouter({
       component: LoginView
     },
     {
-      path: '/games/:id',
+      path: '/game',
       name: 'lobby',
       component: GameView
     }
