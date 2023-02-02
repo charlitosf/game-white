@@ -10,13 +10,13 @@ const gameStore = useGameStore();
 const onLeaveGame = () => {
   gameStore.leaveGame();
 
-  router.push({ name: 'home' });
+  router.replace({ name: 'home' });
 }
 
 gameStore.$subscribe((_, state) => {
   if (!state.admin) {
     gameStore.gameId = null;
-    router.push({ name: 'home' });
+    router.replace({ name: 'home' });
   }
 })
 
