@@ -24,7 +24,7 @@ const onJoinGame = async () => {
   }
 };
 
-const onDeleteGame = (gameIndex: number) => {
+const onDeleteGame = (gameIndex: string) => {
   gameListStore.deleteGame(gameIndex);
 };
 </script>
@@ -45,7 +45,7 @@ const onDeleteGame = (gameIndex: number) => {
     <h2 v-else>You have not started any games yet!</h2>
     <div class="flex vertical-baselined background-container" v-for="game, index in gameListStore.gameList" :key="index">
       <span @click="gameId = game; onJoinGame()" class="main-element">{{ game }}</span>
-      <button @click="onDeleteGame(index)" class="btn btn-danger">Delete</button>
+      <button @click="onDeleteGame(game)" class="btn btn-danger">Delete</button>
     </div>
   </div>
 </template>

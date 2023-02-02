@@ -8,32 +8,22 @@ export const useGameListStore = defineStore('gameList', () => {
   const userStore = useUserStore();
   const gameHeadersRef = fRef(db, 'gameList');
 
-  const gameList: Ref<string[]> = ref([]);
+  const gameList: Ref<Set<string>> = ref(new Set<string>());
 
-  const isEmptyGameList = computed(() => gameList.value.length == 0);
+  const isEmptyGameList = computed(() => gameList.value.size == 0);
 
   // #region Firebase Listeners
   onChildAdded(gameHeadersRef, (snapshot) => {
     if (snapshot.val() === userStore.user?.uid) {
-      gameList.value.push(snapshot.key!);
+      gameList.value.add(snapshot.key!);
     }
   });
   onChildRemoved(gameHeadersRef, (snapshot) => {
-    const index = gameList.value.indexOf(snapshot.key!);
-    if (index > -1) {
-      gameList.value.splice(index, 1);
-    }
+    gameList.value.delete(snapshot.key!);
   });
   // #endregion
 
-  function deleteGame(gameIndex: number | string) {
-    let gameCode: string;
-    if (typeof gameIndex === 'number') {
-      gameCode = gameList.value[gameIndex];
-    } else {
-      gameCode = gameIndex;
-    }
-
+  function deleteGame(gameCode: string) {
     const rootRef = fRef(db);
     const updates: { [path: string]: any } = {};
     updates[`gameList/${gameCode}`] = null;
