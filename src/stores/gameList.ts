@@ -25,16 +25,16 @@ export const useGameListStore = defineStore("gameList", () => {
   const adminGame: Ref<string | null> = ref(null);
 
   const isEmptyGameList = computed(
-    () => guestGame.value === null && adminGame.value === null,
+    () => guestGame.value === null && adminGame.value === null
   );
   const alreadyBelongsToAGame = computed(
-    () => guestGame.value !== null || adminGame.value !== null,
+    () => guestGame.value !== null || adminGame.value !== null
   );
 
   const q = query(
     gameHeadersRef,
     orderByValue(),
-    equalTo(userStore.user?.uid!),
+    equalTo(userStore.user?.uid ?? null)
   );
 
   // #region Firebase Listeners
@@ -51,10 +51,10 @@ export const useGameListStore = defineStore("gameList", () => {
 
   async function deleteAdminGame() {
     const rootRef = fRef(db);
-    const updates: { [path: string]: any } = {};
+    const updates: Record<string, unknown> = {};
     const players = (
       await get(
-        child(rootRef, `gameData/${adminGame.value}/public/participants`),
+        child(rootRef, `gameData/${adminGame.value}/public/participants`)
       )
     ).val();
     if (players !== null) {

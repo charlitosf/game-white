@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import Game from "@/components/Game.vue";
-import Lobby from "@/components/Lobby.vue";
+import GameComponent from "@/components/GameComponent.vue";
+import LobbyComponent from "@/components/LobbyComponent.vue";
 import { useGameStore } from "@/stores/game";
 import { useRouter } from "vue-router";
 
@@ -30,6 +30,6 @@ gameStore.$subscribe((_, state) => {
     Leave game
   </button>
 
-  <Lobby v-if="!gameStore.gameStarted" />
-  <Game v-else />
+  <LobbyComponent v-if="!gameStore.gameStarted" />
+  <GameComponent v-else />
 </template>

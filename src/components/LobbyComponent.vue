@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { useGameStore } from "@/stores/game";
 import { useGameListStore } from "@/stores/gameList";
-import { computed } from "@vue/reactivity";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const gameStore = useGameStore();
@@ -12,7 +11,7 @@ const router = useRouter();
 const word = ref("");
 
 const moreThanOnePlayer = computed(
-  () => Object.keys(gameStore.players).length > 1,
+  () => Object.keys(gameStore.players).length > 1
 );
 
 const onStartGame = () => {
@@ -93,7 +92,7 @@ const onDeleteGame = () => {
       <label v-if="gameStore.amIAdmin" class="switch">
         <input
           @change="onParticipantClicked(uid.toString())"
-          :checked="gameStore.whitePlayers[uid]"
+          :checked="gameStore.whitePlayers.get(uid.toString())"
           type="checkbox"
         />
         <span class="slider round"></span>

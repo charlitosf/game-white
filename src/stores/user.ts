@@ -28,33 +28,33 @@ export const useUserStore = defineStore("user", () => {
 
   async function signIn(
     email: string,
-    password: string,
+    password: string
   ): Promise<null | FirebaseError> {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return null;
-    } catch (error: any) {
-      return error;
+    } catch (error: unknown) {
+      return error as FirebaseError | null;
     }
   }
 
   async function signUp(
     name: string,
     email: string,
-    password: string,
+    password: string
   ): Promise<null | FirebaseError> {
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password,
+        password
       );
       if (userCredential.user) {
         await updateProfile(userCredential.user, { displayName: name });
       }
       return null;
-    } catch (error: any) {
-      return error;
+    } catch (error: unknown) {
+      return error as FirebaseError | null;
     }
   }
 

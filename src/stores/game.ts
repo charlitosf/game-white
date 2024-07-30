@@ -20,23 +20,23 @@ export const useGameStore = defineStore("game", () => {
   const userStore = useUserStore();
   const db = getDatabase();
 
-  const offGameFuncs: { (): void }[] = [];
-  const offWhitePlayersFuncs: { (): void }[] = [];
+  const offGameFuncs: (() => void)[] = [];
+  const offWhitePlayersFuncs: (() => void)[] = [];
 
   const gameId: Ref<string | null> = ref(null);
   const admin: Ref<string | null> = ref(null);
   const gameStarted: Ref<boolean> = ref(false);
   const word: Ref<string | null> = ref(null);
-  const players: Ref<{ [uid: string]: string }> = ref({});
-  const whitePlayers: Ref<{ [uid: string]: boolean }> = ref({});
+  const players: Ref<Map<string, string>> = ref(new Map());
+  const whitePlayers: Ref<Map<string, boolean>> = ref(new Map());
 
   let gameDataRefPromiseResolve: (
-    val: DatabaseReference | PromiseLike<DatabaseReference>,
+    val: DatabaseReference | PromiseLike<DatabaseReference>
   ) => void;
   let gameDataRef: DatabaseReference | Promise<DatabaseReference> = new Promise(
     (r) => {
       gameDataRefPromiseResolve = r;
-    },
+    }
   );
   watch(gameId, (newGameId) => {
     if (newGameId === null) {
@@ -75,7 +75,7 @@ export const useGameStore = defineStore("game", () => {
       try {
         await set(child(gameHeadersRef, gameCode), userStore.user?.uid);
         retry = false;
-      } catch (error) {
+      } catch {
         retry = true;
       }
     } while (retry);
@@ -106,7 +106,7 @@ export const useGameStore = defineStore("game", () => {
       gameId.value = id;
       return true;
     } else if ((await get(child(gameRef, "gameStarted"))).val() === false) {
-      const updateData: { [path: string]: any } = {};
+      const updateData: Record<string, unknown> = {};
       updateData[`gameData/${id}/public/participants/${userStore.user?.uid}`] =
         userStore.user?.displayName;
 
@@ -119,9 +119,9 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function leaveGame(userId?: string) {
-    userId = userId || userStore.user?.uid;
+    userId = userId ?? userStore.user?.uid;
 
-    const updates: { [path: string]: any } = {};
+    const updates: Record<string, unknown> = {};
     updates[`gameData/${gameId.value}/public/participants/${userId}`] = null;
     updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
     updates[`userGame/${userId}`] = null;
@@ -141,7 +141,7 @@ export const useGameStore = defineStore("game", () => {
     }
     const rootRef = fRef(db);
 
-    const updates: { [path: string]: any } = {};
+    const updates: Record<string, unknown> = {};
     updates[`gameData/${gameId.value}/public/admin`] = userId;
     updates[`gameList/${gameId.value}`] = userId;
     updates[
@@ -155,14 +155,14 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function startGame(word: string) {
-    const updates: { [path: string]: any } = {};
+    const updates: Record<string, unknown> = {};
     updates["public/gameStarted"] = true;
     updates["word"] = word;
     update(await gameDataRef, updates);
   }
 
   async function endGame() {
-    const updates: { [path: string]: any } = {};
+    const updates: Record<string, unknown> = {};
     updates["public/gameStarted"] = false;
     updates["word"] = "";
     update(await gameDataRef, updates);
@@ -186,31 +186,37 @@ export const useGameStore = defineStore("game", () => {
         const prevAdmin = admin.value;
         admin.value = snapshot.val();
 
-        whitePlayers.value = {};
+        whitePlayers.value.clear();
         offWhitePlayersFuncs.forEach((offFunc) => offFunc());
         offWhitePlayersFuncs.length = 0;
 
         if (admin.value === userStore.user?.uid) {
           offWhitePlayersFuncs.push(
             onChildAdded(whitesRef, (snapshot) => {
-              whitePlayers.value[snapshot.key!] = true;
-            }),
+              if (snapshot.key) {
+                whitePlayers.value.set(snapshot.key, true);
+              }
+            })
           );
           offWhitePlayersFuncs.push(
             onChildRemoved(whitesRef, (snapshot) => {
-              delete whitePlayers.value[snapshot.key!];
-            }),
+              if (snapshot.key) {
+                whitePlayers.value.delete(snapshot.key);
+              }
+            })
           );
         } else if (admin.value === null && prevAdmin === userStore.user?.uid) {
           detachGame();
-        } else {
+        } else if (userStore.user?.uid) {
           offWhitePlayersFuncs.push(
-            onValue(child(whitesRef, userStore.user?.uid!), (snapshot) => {
-              whitePlayers.value[snapshot.key!] = snapshot.val() || null;
-            }),
+            onValue(child(whitesRef, userStore.user?.uid), (snapshot) => {
+              if (snapshot.key) {
+                whitePlayers.value.set(snapshot.key, snapshot.val() || null);
+              }
+            })
           );
         }
-      }),
+      })
     );
 
     offGameFuncs.push(
@@ -221,20 +227,24 @@ export const useGameStore = defineStore("game", () => {
         } else {
           word.value = "";
         }
-      }),
+      })
     );
     offGameFuncs.push(
       onChildAdded(participantsRef, (snapshot) => {
-        players.value[snapshot.key!] = snapshot.val();
-      }),
+        if (snapshot.key) {
+          players.value.set(snapshot.key, snapshot.val());
+        }
+      })
     );
     offGameFuncs.push(
       onChildRemoved(participantsRef, (snapshot) => {
-        delete players.value[snapshot.key!];
-        if (snapshot.key === userStore.user?.uid) {
-          detachGame();
+        if (snapshot.key) {
+          players.value.delete(snapshot.key);
+          if (snapshot.key === userStore.user?.uid) {
+            detachGame();
+          }
         }
-      }),
+      })
     );
   }
 
@@ -246,15 +256,15 @@ export const useGameStore = defineStore("game", () => {
 
     admin.value = null;
     gameStarted.value = false;
-    players.value = {};
-    whitePlayers.value = {};
+    players.value.clear();
+    whitePlayers.value.clear();
     gameId.value = null;
   }
 
   async function retrieveWord() {
     try {
       word.value = (await get(child(await gameDataRef, "word"))).val();
-    } catch (e) {
+    } catch {
       word.value = "White :)";
     }
   }

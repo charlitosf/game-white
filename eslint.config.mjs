@@ -7,7 +7,8 @@ export default [
   { files: ["**/*.{js,mjs,cjs,ts,vue}"] },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
+  ...tseslint.configs.strict,
+  ...tseslint.configs.stylistic,
   ...pluginVue.configs["flat/essential"],
   {
     files: ["**/*.vue"],

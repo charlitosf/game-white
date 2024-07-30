@@ -33,7 +33,7 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to, from) => {
+router.beforeEach((to) => {
   const userStore = useUserStore();
 
   if (to.name !== "login" && to.name !== "about" && !userStore.user) {
