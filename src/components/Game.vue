@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useGameStore } from '@/stores/game';
+import { useGameStore } from "@/stores/game";
 
 const gameStore = useGameStore();
 
@@ -10,7 +10,9 @@ const onEndGame = () => {
 
 <template>
   <div class="flex justify-end">
-    <button v-if="gameStore.amIAdmin" @click="onEndGame" class="btn btn-danger">End Game</button>
+    <button v-if="gameStore.amIAdmin" @click="onEndGame" class="btn btn-danger">
+      End Game
+    </button>
   </div>
   <div class="container-fullscreen centered">
     <span>{{ gameStore.word }}</span>

@@ -1,21 +1,41 @@
-import { child, equalTo, get, getDatabase, onChildAdded, onChildRemoved, onValue, orderByValue, query, ref as fRef, update } from "firebase/database";
+import {
+  child,
+  equalTo,
+  get,
+  getDatabase,
+  onChildAdded,
+  onChildRemoved,
+  onValue,
+  orderByValue,
+  query,
+  ref as fRef,
+  update,
+} from "firebase/database";
 import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
 import { useUserStore } from "./user";
 
-export const useGameListStore = defineStore('gameList', () => {
+export const useGameListStore = defineStore("gameList", () => {
   const db = getDatabase();
   const userStore = useUserStore();
-  const gameHeadersRef = fRef(db, 'gameList');
+  const gameHeadersRef = fRef(db, "gameList");
   const userGameRef = fRef(db, `userGame/${userStore.user?.uid}`);
 
   const guestGame: Ref<string | null> = ref(null);
   const adminGame: Ref<string | null> = ref(null);
 
-  const isEmptyGameList = computed(() => guestGame.value === null && adminGame.value === null);
-  const alreadyBelongsToAGame = computed(() => guestGame.value !== null || adminGame.value !== null);
+  const isEmptyGameList = computed(
+    () => guestGame.value === null && adminGame.value === null,
+  );
+  const alreadyBelongsToAGame = computed(
+    () => guestGame.value !== null || adminGame.value !== null,
+  );
 
-  const q = query(gameHeadersRef, orderByValue(), equalTo(userStore.user?.uid!));
+  const q = query(
+    gameHeadersRef,
+    orderByValue(),
+    equalTo(userStore.user?.uid!),
+  );
 
   // #region Firebase Listeners
   onChildAdded(q, (snapshot) => {
@@ -32,7 +52,11 @@ export const useGameListStore = defineStore('gameList', () => {
   async function deleteAdminGame() {
     const rootRef = fRef(db);
     const updates: { [path: string]: any } = {};
-    const players = (await get(child(rootRef, `gameData/${adminGame.value}/public/participants`))).val();
+    const players = (
+      await get(
+        child(rootRef, `gameData/${adminGame.value}/public/participants`),
+      )
+    ).val();
     if (players !== null) {
       for (const player of Object.keys(players)) {
         updates[`userGame/${player}`] = null;
@@ -43,5 +67,11 @@ export const useGameListStore = defineStore('gameList', () => {
     update(rootRef, updates);
   }
 
-  return { guestGame, adminGame, isEmptyGameList, alreadyBelongsToAGame, deleteAdminGame };
+  return {
+    guestGame,
+    adminGame,
+    isEmptyGameList,
+    alreadyBelongsToAGame,
+    deleteAdminGame,
+  };
 });

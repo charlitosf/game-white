@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { RouterLink, RouterView } from "vue-router";
+import { useUserStore } from "@/stores/user";
 
 const userStore = useUserStore();
 
 const onLogout = () => {
   userStore.logout();
-}
+};
 </script>
 
 <template>
@@ -123,7 +123,8 @@ div a.router-link-exact-active:hover {
   }
 }
 
-.form-control:focus, .inline-form-control:focus {
+.form-control:focus,
+.inline-form-control:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 0.2rem var(--color-primary);
 }
