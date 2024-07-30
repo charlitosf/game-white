@@ -117,7 +117,7 @@ const doRegister = async () => {
     const result = await userStore.signUp(
       nameReg.value,
       emailReg.value,
-      passwordReg.value,
+      passwordReg.value
     );
     if (result !== null) {
       alert(`${result.code}: ${result.message}`);
@@ -133,17 +133,10 @@ const doLogin = async () => {
     // Login using firebase auth
     const result = await userStore.signIn(
       emailLogin.value,
-      passwordLogin.value,
+      passwordLogin.value
     );
     if (result !== null) {
-      if (
-        result.code === "auth/user-not-found" ||
-        result.code === "auth/wrong-password"
-      ) {
-        alert("auth/wrong-credentials: Wrong email or password");
-      } else {
-        alert(`${result.code}: ${result.message}`);
-      }
+      alert(`${result.code}: ${result.message}`);
     }
   }
 };
