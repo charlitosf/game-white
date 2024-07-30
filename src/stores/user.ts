@@ -17,6 +17,8 @@ export const useUserStore = defineStore("user", () => {
 
   const user: Ref<User | null> = ref(null);
 
+  const authSettled = ref(false);
+
   onAuthStateChanged(auth, (newUser) => {
     user.value = newUser;
     if (newUser) {
@@ -24,6 +26,7 @@ export const useUserStore = defineStore("user", () => {
     } else {
       router.push({ name: "login" });
     }
+    authSettled.value = true;
   });
 
   async function signIn(
@@ -61,5 +64,5 @@ export const useUserStore = defineStore("user", () => {
   function logout() {
     auth.signOut();
   }
-  return { user, logout, signIn, signUp };
+  return { user, logout, signIn, signUp, authSettled };
 });

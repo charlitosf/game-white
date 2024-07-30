@@ -2,14 +2,18 @@
   <div class="login-page">
     <div class="wallpaper"></div>
 
-    <div class="container">
+    <div v-if="userStore.authSettled" class="container">
       <div
         v-if="!registerActive"
         class="card"
         v-bind:class="{ error: emptyFields }"
       >
         <h1>Sign In</h1>
-        <form class="form-group" @submit.prevent="doLogin">
+        <form
+          v-if="userStore.authSettled"
+          class="form-group"
+          @submit.prevent="doLogin"
+        >
           <input
             v-model="emailLogin"
             type="email"
@@ -79,12 +83,14 @@
         </form>
       </div>
     </div>
+    <font-awesome-icon class="icon" v-else :icon="['fas', 'spinner']" spin />
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useUserStore } from "@/stores/user";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 const userStore = useUserStore();
 
@@ -143,6 +149,9 @@ const doLogin = async () => {
 </script>
 
 <style scoped>
+.icon {
+  font-size: 50px;
+}
 p {
   line-height: 2rem;
 }
@@ -154,6 +163,7 @@ p {
 
 .login-page {
   align-items: center;
+  justify-content: center;
   display: flex;
   height: 85vh;
 }

@@ -12,7 +12,7 @@ import "./assets/main.css";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faLinkedin, faGithub } from "@fortawesome/free-brands-svg-icons";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 import { connectAuthEmulator, getAuth } from "@firebase/auth";
@@ -32,7 +32,7 @@ if (import.meta.env.PROD) {
     // Pass your reCAPTCHA v3 site key (public key) to activate(). Make sure this
     // key is the counterpart to the secret key you set in the Firebase console.
     provider: new ReCaptchaV3Provider(
-      import.meta.env.VITE_FIREBASE_CAPTCHA_KEY,
+      import.meta.env.VITE_FIREBASE_CAPTCHA_KEY
     ),
 
     // Optional argument. If true, the SDK automatically refreshes App Check
@@ -47,7 +47,7 @@ if (import.meta.env.PROD) {
   connectAuthEmulator(auth, "http://localhost:9099");
 }
 
-library.add(faEnvelope, faLinkedin, faGithub);
+library.add(faEnvelope, faLinkedin, faGithub, faSpinner);
 
 app.component("font-awesome-icon", FontAwesomeIcon);
 app.mount("#app");
