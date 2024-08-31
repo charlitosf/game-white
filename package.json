@@ -13,7 +13,7 @@
     "deploy-only": "firebase deploy",
     "deploy": "run-s build-only deploy-only",
     "dev:full": "run-p dev emulators",
-    "emulators": "firebase emulators:start"
+    "emulators": "firebase emulators:start --import firebase-data"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
