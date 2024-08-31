@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --noEmit",
     "deploy-only": "firebase deploy",
     "deploy": "run-s build-only deploy-only",
+    "dev:full": "run-p dev emulators",
     "emulators": "firebase emulators:start"
   },
   "dependencies": {
