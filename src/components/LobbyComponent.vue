@@ -86,7 +86,7 @@ const onDeleteGame = () => {
     <div
       :class="{ 'align-end': gameStore.amIAdmin }"
       class="flex spread vertical-centered background-container"
-      v-for="(email, uid) in gameStore.players"
+      v-for="[uid, email] in gameStore.players"
       :key="uid"
     >
       <label v-if="gameStore.amIAdmin" class="switch">
