@@ -34,11 +34,11 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
   const userStore = useUserStore();
   const gameStore = useGameStore();
 
-  const currentGame = await gameStore.getCurrentGameId();
+  const currentGame = gameStore.gameId;
 
   if (to.name !== "login" && to.name !== "about" && !userStore.user) {
     return { name: "login" };

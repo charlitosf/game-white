@@ -18,23 +18,13 @@ import { generate4DigitRandomNumber } from "../utils/utils";
 import { useRouter } from "vue-router";
 
 export const useGameStore = defineStore("game", () => {
+  // #region Dependencies
   const userStore = useUserStore();
   const db = getDatabase();
   const router = useRouter();
+  // #endregion
 
-  let userGameRef = fRef(db, `userGame/${userStore.user?.uid}`);
-  let previousUnsubscribe: (() => void) | null = null;
-
-  watch(userStore, (userStoreChanged) => {
-    userGameRef = fRef(db, `userGame/${userStoreChanged.user?.uid}`);
-    if (previousUnsubscribe) {
-      previousUnsubscribe();
-    }
-    previousUnsubscribe = onValue(userGameRef, (snapshot) => {
-      gameId.value = snapshot.val();
-    });
-  });
-
+  // #region State
   const offGameFuncs: (() => void)[] = [];
   const offWhitePlayersFuncs: (() => void)[] = [];
 
@@ -45,37 +35,41 @@ export const useGameStore = defineStore("game", () => {
   const word: Ref<string | null> = ref(null);
   const players: Ref<Map<string, string>> = ref(new Map());
   const whitePlayers: Ref<Map<string, boolean>> = ref(new Map());
+  // #endregion
 
-  const alreadyBelongsToAGame = computed(() => gameId.value !== null);
-
-  let gameDataRefPromiseResolve: (
-    val: DatabaseReference | PromiseLike<DatabaseReference>
-  ) => void;
-  let gameDataRef: DatabaseReference | Promise<DatabaseReference> = new Promise(
-    (r) => {
-      gameDataRefPromiseResolve = r;
+  // #region Watchers
+  let previousUnsubscribe: (() => void) | null = null;
+  let userGameRef: DatabaseReference | null = null;
+  watch(userStore, (userStoreChanged) => {
+    userGameRef = fRef(db, `userGame/${userStoreChanged.user?.uid}`);
+    if (previousUnsubscribe) {
+      previousUnsubscribe();
     }
-  );
+    previousUnsubscribe = onValue(userGameRef, (snapshot) => {
+      gameId.value = snapshot.val();
+    });
+  });
+
+  let gameDataRef: DatabaseReference | null = null;
   watch(gameId, (newGameId) => {
     if (newGameId === null) {
-      gameDataRef = new Promise((r) => {
-        gameDataRefPromiseResolve = r;
-      });
+      gameDataRef = null;
       detachGame();
       router.replace({ name: "home" });
     } else {
-      gameDataRefPromiseResolve(fRef(db, `gameData/${newGameId}`));
+      gameDataRef = fRef(db, `gameData/${newGameId}`);
       attachGame();
       router.replace({ name: "lobby" });
     }
   });
+  // #endregion
 
+  // #region Computed properties
+  const alreadyBelongsToAGame = computed(() => gameId.value !== null);
   const amIAdmin = computed(() => admin.value == userStore.user?.uid);
+  // #endregion
 
-  const getCurrentGameId = async () => {
-    return gameId.value;
-  };
-
+  // #region Methods
   async function createGame() {
     let gameCode: string;
     let game: DataSnapshot | null = null;
@@ -190,31 +184,61 @@ export const useGameStore = defineStore("game", () => {
   }
 
   async function startGame(word: string) {
+    if (gameDataRef === null) {
+      return;
+    }
+
     const updates: Record<string, unknown> = {};
     updates["public/gameStarted"] = true;
     updates["word"] = word;
-    update(await gameDataRef, updates);
+    update(gameDataRef, updates);
   }
 
   async function endGame() {
+    if (gameDataRef === null) {
+      return;
+    }
+
     const updates: Record<string, unknown> = {};
     updates["public/gameStarted"] = false;
     updates["word"] = "";
-    update(await gameDataRef, updates);
+    update(gameDataRef, updates);
   }
 
   async function toggleWhitePlayer(userId: string) {
-    const whitePlayersRef = child(await gameDataRef, "whitePlayers");
+    if (gameDataRef === null) {
+      return;
+    }
+
+    const whitePlayersRef = child(gameDataRef, "whitePlayers");
     runTransaction(child(whitePlayersRef, userId), (currentData) => {
       return currentData ? null : true;
     });
   }
 
+  async function retrieveWord() {
+    if (gameDataRef === null) {
+      return;
+    }
+
+    try {
+      word.value = (await get(child(gameDataRef, "word"))).val();
+    } catch {
+      word.value = "White :)";
+    }
+  }
+  // #endregion
+
+  // #region Game attachment/detachment
   async function attachGame() {
-    const participantsRef = child(await gameDataRef, "public/participants");
-    const whitesRef = child(await gameDataRef, "whitePlayers");
-    const gameStartedRef = child(await gameDataRef, `public/gameStarted`);
-    const gameAdminRef = child(await gameDataRef, `public/admin`);
+    if (gameDataRef === null) {
+      return;
+    }
+
+    const participantsRef = child(gameDataRef, "public/participants");
+    const whitesRef = child(gameDataRef, "whitePlayers");
+    const gameStartedRef = child(gameDataRef, `public/gameStarted`);
+    const gameAdminRef = child(gameDataRef, `public/admin`);
 
     offGameFuncs.push(
       onValue(gameAdminRef, (snapshot) => {
@@ -292,14 +316,7 @@ export const useGameStore = defineStore("game", () => {
     whitePlayers.value.clear();
     gameId.value = null;
   }
-
-  async function retrieveWord() {
-    try {
-      word.value = (await get(child(await gameDataRef, "word"))).val();
-    } catch {
-      word.value = "White :)";
-    }
-  }
+  // #endregion
 
   return {
     gameId,
@@ -318,6 +335,5 @@ export const useGameStore = defineStore("game", () => {
     joinGame,
     leaveGame,
     deleteGame,
-    getCurrentGameId,
   };
 });
