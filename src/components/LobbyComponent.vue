@@ -6,9 +6,7 @@ const gameStore = useGameStore();
 
 const word = ref("");
 
-const moreThanOnePlayer = computed(
-  () => Object.keys(gameStore.players).length > 1
-);
+const moreThanOnePlayer = computed(() => gameStore.players.size > 1);
 
 const onStartGame = () => {
   gameStore.startGame(word.value);

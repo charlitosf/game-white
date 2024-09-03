@@ -272,9 +272,6 @@ export const useGameStore = defineStore("game", () => {
       onChildRemoved(participantsRef, (snapshot) => {
         if (snapshot.key) {
           players.value.delete(snapshot.key);
-          if (snapshot.key === userStore.user?.uid) {
-            detachGame();
-          }
         }
       })
     );
