@@ -8,7 +8,7 @@
           ".read": "auth !== null",
           "participants": {
             "$userId": {
-              ".write": "auth !== null && $userId === auth.uid && (data.parent().parent().child('gameStarted').val() === false || newData.val() === null)"
+              ".write": "auth !== null && $userId === auth.uid"
             }
           }
         },
@@ -17,8 +17,7 @@
         },
         "whitePlayers": {
           "$userId": {
-            ".read": "auth !== null && auth.uid === $userId && data.parent().parent().child('public').child('participants').child(auth.uid).exists()",
-            ".write": "auth !== null && $userId === auth.uid && data.parent().parent().child('public').child('participants').child(auth.uid).exists() && newData.val() === null"
+            ".read": "auth !== null && auth.uid === $userId && data.parent().parent().child('public').child('participants').child(auth.uid).exists()"
           }
         }
       }

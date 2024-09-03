@@ -126,13 +126,7 @@ export const useGameStore = defineStore("game", () => {
     const gameRef = fRef(db, `gameData/${id}/public`);
 
     const admin = await get(child(gameRef, "admin"));
-    // Racing condition if game starts right here or admin is changed.
-    // Purpousefully ignored as it is not game-breaker if a player joins an already started game and it should not change admin while the game is started
-    // They will just never be white in the first round
-    if (admin.val() === userStore.user?.uid) {
-      gameId.value = id;
-      return true;
-    } else if ((await get(child(gameRef, "gameStarted"))).val() === false) {
+    if (admin.val() !== null) {
       const updateData: Record<string, unknown> = {};
       updateData[`gameData/${id}/public/participants/${userStore.user?.uid}`] =
         userStore.user?.displayName;
@@ -151,13 +145,15 @@ export const useGameStore = defineStore("game", () => {
     const admin = await get(fRef(db, `gameData/${gameId.value}/public/admin`));
 
     if (admin.val() === userId) {
-      // Can't leave if you are the admin
+      // The admin can't leave the game
       return;
     }
 
     const updates: Record<string, unknown> = {};
     updates[`gameData/${gameId.value}/public/participants/${userId}`] = null;
-    updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
+    if (userStore.user?.uid === admin.val()) {
+      updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
+    }
     updates[`userGame/${userId}`] = null;
     await update(fRef(db), updates);
   }
