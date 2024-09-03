@@ -1,22 +1,15 @@
 {
   "rules": {
-    "gameList": {
-      ".read": "auth !== null",
-      ".indexOn": ".value",
-      "$gameListId": {
-        ".write": "auth !== null && (data.val() === auth.uid || !data.exists())"
-      }
-    },
     "gameData": {
       "$gameDataId": {
-        ".read": "auth !== null && (data.child('public').child('admin').val() === auth.uid || root.child('gameList').child($gameDataId).val() === auth.uid)",
-        ".write": "auth !== null && (data.child('public').child('admin').val() === auth.uid || root.child('gameList').child($gameDataId).val() === auth.uid)",
+        ".read": "auth !== null && (data.child('public').child('admin').val() === auth.uid)",
+        ".write": "auth !== null && (data.child('public').child('admin').val() === auth.uid || !data.exists())",
         "public": {
           ".read": "auth !== null",
           "participants": {
             "$userId": {
               ".write": "auth !== null && $userId === auth.uid",
-              ".validate": "root.child('gameData').child('public').child('admin').val() == auth.uid || root.child('gameData').child($gameDataId).child('public').child('gameStarted').val() === false || newData.val() === null"
+              ".validate": "root.child('gameData').child($gameDataId).child('public').child('admin').val() == auth.uid || root.child('gameData').child($gameDataId).child('public').child('gameStarted').val() === false || newData.val() === null"
             }
           }
         },

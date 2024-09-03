@@ -1,12 +1,8 @@
 <script lang="ts" setup>
-import { useGameStore } from "@/stores/game";
-import { useGameListStore } from "@/stores/gameList";
 import { computed, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useGameStore } from "../stores/game";
 
 const gameStore = useGameStore();
-const gameListStore = useGameListStore();
-const router = useRouter();
 
 const word = ref("");
 
@@ -35,10 +31,7 @@ const onMakeAdminRandomly = () => {
 };
 
 const onDeleteGame = () => {
-  gameListStore.deleteAdminGame();
-  gameStore.gameId = null;
-
-  router.push({ name: "home" });
+  gameStore.deleteGame();
 };
 </script>
 

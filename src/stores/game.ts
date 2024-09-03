@@ -1,4 +1,3 @@
-import { generate4DigitRandomNumber } from "@/utils/utils";
 import {
   getDatabase,
   child,
@@ -8,27 +7,46 @@ import {
   ref as fRef,
   update,
   runTransaction,
-  set,
   get,
   type DatabaseReference,
+  DataSnapshot,
 } from "firebase/database";
 import { defineStore } from "pinia";
 import { computed, ref, watch, type Ref } from "vue";
 import { useUserStore } from "./user";
+import { generate4DigitRandomNumber } from "../utils/utils";
+import { useRouter } from "vue-router";
 
 export const useGameStore = defineStore("game", () => {
   const userStore = useUserStore();
   const db = getDatabase();
+  const router = useRouter();
+
+  let userGameRef = fRef(db, `userGame/${userStore.user?.uid}`);
+  let previousUnsubscribe: (() => void) | null = null;
+
+  watch(userStore, (userStoreChanged) => {
+    userGameRef = fRef(db, `userGame/${userStoreChanged.user?.uid}`);
+    if (previousUnsubscribe) {
+      previousUnsubscribe();
+    }
+    previousUnsubscribe = onValue(userGameRef, (snapshot) => {
+      gameId.value = snapshot.val();
+    });
+  });
 
   const offGameFuncs: (() => void)[] = [];
   const offWhitePlayersFuncs: (() => void)[] = [];
 
   const gameId: Ref<string | null> = ref(null);
+
   const admin: Ref<string | null> = ref(null);
   const gameStarted: Ref<boolean> = ref(false);
   const word: Ref<string | null> = ref(null);
   const players: Ref<Map<string, string>> = ref(new Map());
   const whitePlayers: Ref<Map<string, boolean>> = ref(new Map());
+
+  const alreadyBelongsToAGame = computed(() => gameId.value !== null);
 
   let gameDataRefPromiseResolve: (
     val: DatabaseReference | PromiseLike<DatabaseReference>
@@ -44,55 +62,70 @@ export const useGameStore = defineStore("game", () => {
         gameDataRefPromiseResolve = r;
       });
       detachGame();
+      router.replace({ name: "home" });
     } else {
       gameDataRefPromiseResolve(fRef(db, `gameData/${newGameId}`));
       attachGame();
+      router.replace({ name: "lobby" });
     }
   });
 
   const amIAdmin = computed(() => admin.value == userStore.user?.uid);
 
-  const generateRandomGameCode = async () => {
-    const gameHeadersRef = fRef(db, "gameList");
-    const gameData = (await get(gameHeadersRef)).val();
-
-    let gameCode: string = generate4DigitRandomNumber();
-    if (gameData !== null) {
-      const existingGames = Object.keys(gameData);
-      while (existingGames.includes(gameCode)) {
-        gameCode = generate4DigitRandomNumber();
-      }
-    }
-    return gameCode;
+  const getCurrentGameId = async () => {
+    return gameId.value;
   };
 
   async function createGame() {
-    const gameHeadersRef = fRef(db, "gameList");
     let gameCode: string;
-    let retry = false;
+    let game: DataSnapshot | null = null;
     do {
-      gameCode = await generateRandomGameCode();
-      try {
-        await set(child(gameHeadersRef, gameCode), userStore.user?.uid);
-        retry = false;
-      } catch {
-        retry = true;
-      }
-    } while (retry);
+      gameCode = generate4DigitRandomNumber();
 
-    const gameObject = {
+      try {
+        game = await get(fRef(db, `gameList/${gameCode}/public/admin`));
+      } catch {
+        game = null;
+      }
+    } while (game !== null);
+
+    const updates: Record<string, unknown> = {};
+
+    updates[`gameData/${gameCode}`] = {
       public: {
         admin: userStore.user?.uid,
         gameStarted: false,
       },
       word: "",
-      // whitePlayers: { uid: true, }
     };
-
+    updates[`userGame/${userStore.user?.uid}`] = gameCode;
     gameId.value = gameCode;
 
-    set(await gameDataRef, gameObject);
+    await update(fRef(db), updates);
     return gameCode;
+  }
+
+  async function deleteGame(id?: string) {
+    if (id === undefined) {
+      if (gameId.value === null) {
+        return;
+      }
+      id = gameId.value;
+    }
+    const rootRef = fRef(db);
+    const updates: Record<string, unknown> = {};
+    const players = (
+      await get(child(rootRef, `gameData/${id}/public/participants`))
+    ).val();
+    if (players !== null) {
+      for (const player of Object.keys(players)) {
+        updates[`userGame/${player}`] = null;
+      }
+    }
+    updates[`userGame/${userStore.user?.uid}`] = null;
+    updates[`gameData/${id}`] = null;
+    update(rootRef, updates);
+    gameId.value = null;
   }
 
   async function joinGame(id: string) {
@@ -121,16 +154,18 @@ export const useGameStore = defineStore("game", () => {
   async function leaveGame(userId?: string) {
     userId = userId ?? userStore.user?.uid;
 
+    const admin = await get(fRef(db, `gameData/${gameId.value}/public/admin`));
+
+    if (admin.val() === userId) {
+      // Can't leave if you are the admin
+      return;
+    }
+
     const updates: Record<string, unknown> = {};
     updates[`gameData/${gameId.value}/public/participants/${userId}`] = null;
     updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
     updates[`userGame/${userId}`] = null;
-    update(fRef(db), updates);
-
-    if (userId === userStore.user?.uid) {
-      gameId.value = null;
-      detachGame();
-    }
+    await update(fRef(db), updates);
   }
 
   // Transfer administrator privileges from current user to another user (randomly if not provided)
@@ -143,14 +178,11 @@ export const useGameStore = defineStore("game", () => {
 
     const updates: Record<string, unknown> = {};
     updates[`gameData/${gameId.value}/public/admin`] = userId;
-    updates[`gameList/${gameId.value}`] = userId;
     updates[
       `gameData/${gameId.value}/public/participants/${userStore.user?.uid}`
-    ] = userStore.user?.email;
+    ] = userStore.user?.displayName;
     updates[`gameData/${gameId.value}/public/participants/${userId}`] = null;
     updates[`gameData/${gameId.value}/whitePlayers/${userId}`] = null;
-    updates[`userGame/${userStore.user?.uid}`] = gameId.value;
-    updates[`userGame/${userId}`] = null;
     update(rootRef, updates);
   }
 
@@ -277,6 +309,7 @@ export const useGameStore = defineStore("game", () => {
     players,
     whitePlayers,
     amIAdmin,
+    alreadyBelongsToAGame,
     createGame,
     startGame,
     endGame,
@@ -284,5 +317,7 @@ export const useGameStore = defineStore("game", () => {
     toggleWhitePlayer,
     joinGame,
     leaveGame,
+    deleteGame,
+    getCurrentGameId,
   };
 });

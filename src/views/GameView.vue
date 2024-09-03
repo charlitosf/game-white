@@ -9,8 +9,6 @@ const gameStore = useGameStore();
 
 const onLeaveGame = () => {
   gameStore.leaveGame();
-
-  router.replace({ name: "home" });
 };
 
 gameStore.$subscribe((_, state) => {

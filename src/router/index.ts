@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
-import LoginView from "../views/LoginView.vue";
+import HomeView from "@/views/HomeView.vue";
+import LoginView from "@/views/LoginView.vue";
 import { useUserStore } from "@/stores/user";
 import GameView from "@/views/GameView.vue";
+import { useGameStore } from "@/stores/game";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,11 +34,18 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const userStore = useUserStore();
+  const gameStore = useGameStore();
+
+  const currentGame = await gameStore.getCurrentGameId();
 
   if (to.name !== "login" && to.name !== "about" && !userStore.user) {
     return { name: "login" };
+  } else if (to.name === "lobby" && currentGame === null) {
+    return { name: "home" };
+  } else if (to.name === "home" && currentGame !== null) {
+    return { name: "lobby" };
   } else if (to.name === "login" && userStore.user) {
     return { name: "home" };
   } else {
