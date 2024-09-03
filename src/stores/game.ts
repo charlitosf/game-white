@@ -171,8 +171,11 @@ export const useGameStore = defineStore("game", () => {
   // Transfer administrator privileges from current user to another user (randomly if not provided)
   function makeAdmin(userId: string | null = null) {
     if (userId === null) {
-      const participants = Object.keys(players.value);
-      userId = participants[Math.floor(Math.random() * participants.length)];
+      let i = Math.ceil(Math.random() * players.value.size);
+      while (i > 0) {
+        i--;
+        userId = players.value.keys().next().value;
+      }
     }
     const rootRef = fRef(db);
 
