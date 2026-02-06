@@ -33,7 +33,9 @@
             Don't have an account?
             <a
               href="#"
-              @click="(registerActive = !registerActive), (emptyFields = false)"
+              @click="
+                ((registerActive = !registerActive), (emptyFields = false))
+              "
               >Sign up here</a
             >
           </p>
@@ -76,7 +78,9 @@
             Already have an account?
             <a
               href="#"
-              @click="(registerActive = !registerActive), (emptyFields = false)"
+              @click="
+                ((registerActive = !registerActive), (emptyFields = false))
+              "
               >Sign in here</a
             >
           </p>
@@ -123,7 +127,7 @@ const doRegister = async () => {
     const result = await userStore.signUp(
       nameReg.value,
       emailReg.value,
-      passwordReg.value
+      passwordReg.value,
     );
     if (result !== null) {
       alert(`${result.code}: ${result.message}`);
@@ -139,7 +143,7 @@ const doLogin = async () => {
     // Login using firebase auth
     const result = await userStore.signIn(
       emailLogin.value,
-      passwordLogin.value
+      passwordLogin.value,
     );
     if (result !== null) {
       alert(`${result.code}: ${result.message}`);

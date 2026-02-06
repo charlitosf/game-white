@@ -251,14 +251,14 @@ export const useGameStore = defineStore("game", () => {
               if (snapshot.key) {
                 whitePlayers.value.set(snapshot.key, true);
               }
-            })
+            }),
           );
           offWhitePlayersFuncs.push(
             onChildRemoved(whitesRef, (snapshot) => {
               if (snapshot.key) {
                 whitePlayers.value.delete(snapshot.key);
               }
-            })
+            }),
           );
         } else if (admin.value === null && prevAdmin === userStore.user?.uid) {
           detachGame();
@@ -268,10 +268,10 @@ export const useGameStore = defineStore("game", () => {
               if (snapshot.key) {
                 whitePlayers.value.set(snapshot.key, snapshot.val() || null);
               }
-            })
+            }),
           );
         }
-      })
+      }),
     );
 
     offGameFuncs.push(
@@ -282,21 +282,21 @@ export const useGameStore = defineStore("game", () => {
         } else {
           word.value = "";
         }
-      })
+      }),
     );
     offGameFuncs.push(
       onChildAdded(participantsRef, (snapshot) => {
         if (snapshot.key) {
           players.value.set(snapshot.key, snapshot.val());
         }
-      })
+      }),
     );
     offGameFuncs.push(
       onChildRemoved(participantsRef, (snapshot) => {
         if (snapshot.key) {
           players.value.delete(snapshot.key);
         }
-      })
+      }),
     );
   }
 
