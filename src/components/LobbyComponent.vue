@@ -27,20 +27,9 @@ const onMakeAdmin = (participantUid: string) => {
 const onMakeAdminRandomly = () => {
   gameStore.makeAdmin();
 };
-
-const onDeleteGame = () => {
-  gameStore.deleteGame();
-};
 </script>
 
 <template>
-  <button
-    v-if="gameStore.amIAdmin"
-    @click="onDeleteGame"
-    class="btn btn-danger mb-1"
-  >
-    Delete game
-  </button>
   <div class="container title mb-1">Lobby of game: {{ gameStore.gameId }}</div>
   <form
     v-if="gameStore.amIAdmin"

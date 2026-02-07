@@ -59,7 +59,7 @@ export const useGameStore = defineStore("game", () => {
     } else {
       gameDataRef = fRef(db, `gameData/${newGameId}`);
       attachGame();
-      router.replace({ name: "lobby" });
+      router.replace({ name: "lobby", params: { gameId: newGameId } });
     }
   });
   // #endregion

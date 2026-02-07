@@ -10,13 +10,13 @@ const gameIdForm = ref("");
 
 const onStartGame = async () => {
   await gameStore.createGame();
-  router.push({ name: "lobby" });
+  router.push({ name: "lobby", params: { gameId: gameStore.gameId } });
 };
 
 const onJoinGame = async () => {
   const successful = await gameStore.joinGame(gameIdForm.value);
   if (successful) {
-    router.push({ name: "lobby" });
+    router.push({ name: "lobby", params: { gameId: gameIdForm.value } });
   } else {
     alert("Game does not exist or has already started!");
   }

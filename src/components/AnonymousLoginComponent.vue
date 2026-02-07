@@ -12,11 +12,17 @@
       <input type="submit" class="btn btn-primary" />
       <p>
         Already have an account?
-        <router-link :to="{ name: 'login-normal' }">Sign in here</router-link>
+        <router-link
+          :to="{ name: 'login-normal', query: router.currentRoute.value.query }"
+          >Sign in here</router-link
+        >
       </p>
       <p>
         Want to create an account?
-        <router-link :to="{ name: 'register' }">Register here</router-link>
+        <router-link
+          :to="{ name: 'register', query: router.currentRoute.value.query }"
+          >Register here</router-link
+        >
       </p>
     </form>
   </div>
@@ -25,9 +31,10 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useUserStore } from "@/stores/user";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 
 const userStore = useUserStore();
+const router = useRouter();
 
 const name = ref("");
 
