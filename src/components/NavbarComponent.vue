@@ -1,9 +1,7 @@
 <template>
   <div class="navbar">
     <RouterLink v-if="userStore.user" :to="{ name: 'home' }">Home</RouterLink>
-    <RouterLink v-if="!userStore.user" :to="{ name: 'login-anonymous' }"
-      >Login</RouterLink
-    >
+    <RouterLink v-else :to="{ name: 'login-anonymous' }">Login</RouterLink>
     <span v-if="userStore.user?.displayName">
       Hello, {{ userStore.user.displayName }}
     </span>
