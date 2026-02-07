@@ -11,9 +11,11 @@ const onLogout = () => {
 
 <template>
   <div class="navbar">
-    <RouterLink v-if="userStore.user" to="/">Home</RouterLink>
-    <RouterLink v-if="!userStore.user" to="/login">Login</RouterLink>
-    <RouterLink class="about" to="/about">About</RouterLink>
+    <RouterLink v-if="userStore.user" :to="{ name: 'home' }">Home</RouterLink>
+    <RouterLink v-if="!userStore.user" :to="{ name: 'login-anonymous' }"
+      >Login</RouterLink
+    >
+    <RouterLink to="/about">About</RouterLink>
     <a v-if="userStore.user" href="#" @click="onLogout">Logout</a>
   </div>
   <RouterView />
@@ -37,10 +39,6 @@ div a.router-link-exact-active {
 
 div a.router-link-exact-active:hover {
   background-color: transparent;
-}
-
-.about {
-  margin-left: auto;
 }
 
 .btn {
