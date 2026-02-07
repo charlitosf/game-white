@@ -57,7 +57,6 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  console.log("Navigating to", to.fullPath);
   const userStore = useUserStore();
   const gameStore = useGameStore();
 
