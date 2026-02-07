@@ -3,6 +3,7 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithEmailAndPassword,
   updateProfile,
   type User,
@@ -61,8 +62,20 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
+  async function anonymousSignIn(name: string) {
+    try {
+      const userCredential = await signInAnonymously(auth);
+      if (userCredential.user) {
+        await updateProfile(userCredential.user, { displayName: name });
+      }
+      return null;
+    } catch (error: unknown) {
+      return error as FirebaseError | null;
+    }
+  }
+
   function logout() {
     auth.signOut();
   }
-  return { user, logout, signIn, signUp, authSettled };
+  return { user, logout, signIn, signUp, anonymousSignIn, authSettled };
 });

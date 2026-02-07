@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import LoginView from "@/views/LoginView.vue";
 import { useUserStore } from "@/stores/user";
 import { useGameStore } from "@/stores/game";
+import LoginView from "../views/LoginView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,9 +21,26 @@ const router = createRouter({
       component: () => import("../views/AboutView.vue"),
     },
     {
-      path: "/login",
+      path: "/auth",
       name: "login",
       component: LoginView,
+      children: [
+        {
+          path: "anonymous",
+          name: "login-anonymous",
+          component: () => import("../components/AnonymousLoginComponent.vue"),
+        },
+        {
+          path: "login",
+          name: "login-normal",
+          component: () => import("../components/LoginComponent.vue"),
+        },
+        {
+          path: "register",
+          name: "register",
+          component: () => import("../components/RegisterComponent.vue"),
+        },
+      ],
     },
     {
       path: "/game",
@@ -39,13 +56,19 @@ router.beforeEach((to) => {
 
   const currentGame = gameStore.gameId;
 
-  if (to.name !== "login" && to.name !== "about" && !userStore.user) {
-    return { name: "login" };
+  if (
+    to.name &&
+    ["login-anonymous", "login-normal", "register", "about"].includes(
+      to.name.toString(),
+    ) === false &&
+    !userStore.user
+  ) {
+    return { name: "login-anonymous" };
   } else if (to.name === "lobby" && currentGame === null) {
     return { name: "home" };
   } else if (to.name === "home" && currentGame !== null) {
     return { name: "lobby" };
-  } else if (to.name === "login" && userStore.user) {
+  } else if (to.name === "login-anonymous" && userStore.user) {
     return { name: "home" };
   } else {
     return true;
