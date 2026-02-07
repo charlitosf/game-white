@@ -4,8 +4,13 @@
     <RouterLink v-if="!userStore.user" :to="{ name: 'login-anonymous' }"
       >Login</RouterLink
     >
-    <RouterLink to="/about">About</RouterLink>
-    <a v-if="userStore.user" href="#" @click="onLogout">Logout</a>
+    <span v-if="userStore.user?.displayName">
+      Hello, {{ userStore.user.displayName }}
+    </span>
+    <span>
+      <RouterLink to="/about">About</RouterLink>
+      <a v-if="userStore.user" href="#" @click="onLogout">Logout</a>
+    </span>
   </div>
 </template>
 
@@ -25,6 +30,7 @@ const onLogout = () => {
   display: flex;
   width: 100%;
   justify-content: space-between;
+  align-items: center;
   background-color: rgb(64, 64, 64);
 }
 
