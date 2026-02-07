@@ -33,13 +33,20 @@
       <input type="submit" class="btn btn-primary" />
       <p>
         Don't want an account?
-        <router-link :to="{ name: 'login-anonymous' }"
+        <router-link
+          :to="{
+            name: 'login-anonymous',
+            query: router.currentRoute.value.query,
+          }"
           >Just enter your name here</router-link
         >
       </p>
       <p>
         Already have an account?
-        <router-link :to="{ name: 'login-normal' }">Sign in here</router-link>
+        <router-link
+          :to="{ name: 'login-normal', query: router.currentRoute.value.query }"
+          >Sign in here</router-link
+        >
       </p>
     </form>
   </div>
@@ -48,7 +55,9 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useUserStore } from "@/stores/user";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const userStore = useUserStore();
 
 const nameReg = ref("");

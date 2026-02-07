@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
 import { useUserStore } from "@/stores/user";
 import { useGameStore } from "@/stores/game";
-import LoginView from "../views/LoginView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,6 +10,7 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: HomeView,
+      meta: { requiresAuth: true },
     },
     {
       path: "/about",
@@ -19,11 +19,12 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import("../views/AboutView.vue"),
+      meta: { requiresAuth: false },
     },
     {
       path: "/auth",
-      name: "login",
-      component: LoginView,
+      component: () => import("../views/LoginView.vue"),
+      meta: { requiresAuth: false, isLoginPage: true },
       children: [
         {
           path: "anonymous",
@@ -40,35 +41,33 @@ const router = createRouter({
           name: "register",
           component: () => import("../components/RegisterComponent.vue"),
         },
+        {
+          path: "",
+          redirect: { name: "login-anonymous" },
+        },
       ],
     },
     {
-      path: "/game",
+      path: "/game/:gameId",
       name: "lobby",
       component: () => import("../views/GameView.vue"),
+      meta: { requiresAuth: true },
     },
   ],
 });
 
 router.beforeEach((to) => {
+  console.log("Navigating to", to.fullPath);
   const userStore = useUserStore();
   const gameStore = useGameStore();
 
   const currentGame = gameStore.gameId;
 
-  if (
-    to.name &&
-    ["login-anonymous", "login-normal", "register", "about"].includes(
-      to.name.toString(),
-    ) === false &&
-    !userStore.user
-  ) {
-    return { name: "login-anonymous" };
-  } else if (to.name === "lobby" && currentGame === null) {
-    return { name: "home" };
+  if (to.meta.requiresAuth && !userStore.user) {
+    return { name: "login-anonymous", query: { redirect: to.fullPath } };
   } else if (to.name === "home" && currentGame !== null) {
     return { name: "lobby" };
-  } else if (to.name === "login-anonymous" && userStore.user) {
+  } else if (to.meta.isLoginPage === true && userStore.user) {
     return { name: "home" };
   } else {
     return true;

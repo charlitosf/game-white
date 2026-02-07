@@ -23,9 +23,18 @@ export const useUserStore = defineStore("user", () => {
   onAuthStateChanged(auth, (newUser) => {
     user.value = newUser;
     if (newUser) {
-      router.push({ name: "home" });
+      if (router.currentRoute.value.query.redirect) {
+        router.replace(router.currentRoute.value.query.redirect as string);
+      } else {
+        router.replace({ name: "home" });
+      }
     } else {
-      router.push({ name: "login" });
+      if (router.currentRoute.value.meta.requiresAuth === true) {
+        router.push({
+          name: "login-anonymous",
+          query: router.currentRoute.value.query,
+        });
+      }
     }
     authSettled.value = true;
   });

@@ -7,16 +7,13 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const gameStore = useGameStore();
 
+if (gameStore.gameId === null) {
+  gameStore.joinGame(router.currentRoute.value.params.gameId as string);
+}
+
 const onLeaveGame = () => {
   gameStore.leaveGame();
 };
-
-gameStore.$subscribe((_, state) => {
-  if (!state.admin) {
-    gameStore.gameId = null;
-    router.replace({ name: "home" });
-  }
-});
 </script>
 
 <template>
