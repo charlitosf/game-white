@@ -67,6 +67,9 @@ export const useGameStore = defineStore("game", () => {
   // #region Computed properties
   const alreadyBelongsToAGame = computed(() => gameId.value !== null);
   const amIAdmin = computed(() => admin.value == userStore.user?.uid);
+  const amIWhitePlayer = computed(
+    () => whitePlayers.value.get(userStore.user?.uid ?? "") === true,
+  );
   // #endregion
 
   // #region Methods
@@ -323,6 +326,7 @@ export const useGameStore = defineStore("game", () => {
     whitePlayers,
     amIAdmin,
     alreadyBelongsToAGame,
+    amIWhitePlayer,
     createGame,
     startGame,
     endGame,
