@@ -17,8 +17,16 @@ const onLeaveGame = () => {
 const onDeleteGame = () => {
   gameStore.deleteGame();
 };
-const onCopyGameLink = () => {
-  navigator.clipboard.writeText(window.location.href);
+const onCopyGameLink = async () => {
+  if (navigator.share) {
+    await navigator.share({
+      title: "Game link",
+      url: window.location.href,
+    });
+    return;
+  }
+
+  await navigator.clipboard.writeText(window.location.href);
   alert("Game link copied to clipboard");
 };
 </script>
@@ -37,7 +45,7 @@ const onCopyGameLink = () => {
     </button>
 
     <button @click="onCopyGameLink" class="btn btn-primary mb-1">
-      Copy game link
+      Share game link
     </button>
   </div>
 
