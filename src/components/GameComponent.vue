@@ -68,6 +68,8 @@ const onToggleFlip = () => {
   border-radius: 10px;
   perspective: 1000px;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .flip-card-inner {
